@@ -21,7 +21,12 @@
 
 
 module vga_out(
+    //inputs
     input clk,
+    input [3:0] pix_in_r,
+    input [3:0] pix_in_g,
+    input [3:0] pix_in_b,
+    //outputs
     output [3:0] pix_r,
     output [3:0] pix_g,
     output [3:0] pix_b,
@@ -37,9 +42,9 @@ module vga_out(
     assign hsync = (hcount<=135) ? 1'b0 : 1'b1;
     assign vsync = (vcount<=2) ? 1'b1 : 1'b0;
     
-    assign pix_r = (hcount>=336 && hcount<=1615 && vcount>=27 && vcount<=826) ? 4'b0000 : 4'b0000;
-    assign pix_g = (hcount>=336 && hcount<=1615 && vcount>=27 && vcount<=826) ? 4'b0000 : 4'b0000;
-    assign pix_b = (hcount>=336 && hcount<=1615 && vcount>=27 && vcount<=826) ? 4'b1111 : 4'b0000;
+    assign pix_r = (hcount>=336 && hcount<=1615 && vcount>=27 && vcount<=826) ? pix_in_r : 4'b0000;
+    assign pix_g = (hcount>=336 && hcount<=1615 && vcount>=27 && vcount<=826) ? pix_in_g : 4'b0000;
+    assign pix_b = (hcount>=336 && hcount<=1615 && vcount>=27 && vcount<=826) ? pix_in_b : 4'b0000;
     
     always_ff@(posedge clk)
     begin
@@ -55,13 +60,13 @@ module vga_out(
             hcount <= hcount + 1'b1;
     
     if (hcount>=336 && hcount<=1615)
-        curr_x = hcount - 336;
+        curr_x <= hcount - 336;
     else
-        curr_x = -1;
+        curr_x <= 11'b1000_0000_000;
     if (vcount>=27 && vcount<=826)
-        curr_y = vcount - 27;
+        curr_y <= vcount - 27;
     else
-        curr_y = -1;
+        curr_y <= 10'b1000_0000_00;
       
     end
     
