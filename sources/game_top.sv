@@ -122,20 +122,23 @@ module game_top(
         end
     end
     logic [3:0] pix_wire_r_1, pix_wire_g_1, pix_wire_b_1;
-    drawcon red_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
-                    .in_pos_y(y_pos), .in_width_y(100), .draw_y(curr_y),
-                    .bg_color({pix_wire_r_0, pix_wire_g_0, pix_wire_b_0}), 
-                    .in_pix_r(4'b1111), .in_pix_g(4'b0000), .in_pix_b(4'b0000),
-                    .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1));
-    
-    logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
-    drawcon blue_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
-                    .in_pos_y(y_pos+100), .in_width_y(100), .draw_y(curr_y),
-                    .bg_color({pix_wire_r_1, pix_wire_g_1, pix_wire_b_1}), 
-                    .in_pix_r(4'b0000), .in_pix_g(4'b0000), .in_pix_b(4'b1111),
-                    .o_pix_r(pix_wire_r_2), .o_pix_g(pix_wire_g_2), .o_pix_b(pix_wire_b_2));                    
+//     drawcon red_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
+//                     .in_pos_y(y_pos), .in_width_y(100), .draw_y(curr_y),
+//                     .bg_color({pix_wire_r_0, pix_wire_g_0, pix_wire_b_0}), 
+//                     .in_pix_r(4'b1111), .in_pix_g(4'b0000), .in_pix_b(4'b0000),
+//                     .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1));
+    image_rom_reader img(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .pos_x(x_pos), .pos_y(y_pos), .bg_color({pix_wire_r_0, pix_wire_g_0, pix_wire_b_0}),
+                        .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1));
+
+
+    // logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
+    // drawcon blue_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
+    //                 .in_pos_y(y_pos+100), .in_width_y(100), .draw_y(curr_y),
+    //                 .bg_color({pix_wire_r_1, pix_wire_g_1, pix_wire_b_1}), 
+    //                 .in_pix_r(4'b0000), .in_pix_g(4'b0000), .in_pix_b(4'b1111),
+    //                 .o_pix_r(pix_wire_r_2), .o_pix_g(pix_wire_g_2), .o_pix_b(pix_wire_b_2));                    
     
 
-    vga_out vga (.clk(pixclk), .pix_in_r(pix_wire_r_2), .pix_in_g(pix_wire_g_2), .pix_in_b(pix_wire_b_2),.pix_r(pix_r), .pix_g(pix_g), .pix_b(pix_b), .hsync(hsync), .vsync(vsync), .curr_x(curr_x), .curr_y(curr_y));
+    vga_out vga (.clk(pixclk), .pix_in_r(pix_wire_r_1), .pix_in_g(pix_wire_g_1), .pix_in_b(pix_wire_b_1),.pix_r(pix_r), .pix_g(pix_g), .pix_b(pix_b), .hsync(hsync), .vsync(vsync), .curr_x(curr_x), .curr_y(curr_y));
 
 endmodule
