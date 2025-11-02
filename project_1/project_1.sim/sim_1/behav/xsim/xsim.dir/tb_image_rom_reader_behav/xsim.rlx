@@ -1,0 +1,12 @@
+
+{ 
+    crc :  13312661378393649762  , 
+    ccp_crc :  0  , 
+    cmdline : " -wto 051d06ddf2d64e5f91f1ef90c01ee499 --incr --debug typical --relax --mt 8 -L xil_defaultlib -L blk_mem_gen_v8_4_4 -L uvm -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot tb_image_rom_reader_behav xil_defaultlib.tb_image_rom_reader xil_defaultlib.glbl" , 
+    buildDate : "Nov 18 2020" , 
+    buildTime : "09:20:35" , 
+    linkCmd : "/usr/bin/gcc -Wa,-W  -O -fPIC  -m64  -Wl,--no-as-needed  -Wl,--unresolved-symbols=ignore-all  -o \"xsim.dir/tb_image_rom_reader_behav/xsimk\"   \"xsim.dir/tb_image_rom_reader_behav/obj/xsim_0.lnx64.o\" \"xsim.dir/tb_image_rom_reader_behav/obj/xsim_1.lnx64.o\" -L\"/sw/workstations/apps/linux-ubuntu22.04-ivybridge/xilinx/2020.2/gcc-11.3.0/ekwesbbm3ihgiun3hq4k3jqblkshewa7/Vivado/2020.2/lib/lnx64.o\" -lrdi_simulator_kernel   -lrdi_simbridge_kernel" , 
+    aggregate_nets : 
+    [ 
+    ] 
+} 

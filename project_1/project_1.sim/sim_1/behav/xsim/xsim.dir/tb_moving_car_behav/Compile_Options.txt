@@ -1,0 +1,1 @@
+-wto "051d06ddf2d64e5f91f1ef90c01ee499" --incr --debug "typical" --relax --mt "8" -L "xil_defaultlib" -L "blk_mem_gen_v8_4_4" -L "uvm" -L "unisims_ver" -L "unimacro_ver" -L "secureip" -L "xpm" --snapshot "tb_moving_car_behav" "xil_defaultlib.tb_moving_car" "xil_defaultlib.glbl" -log "elaborate.log" 

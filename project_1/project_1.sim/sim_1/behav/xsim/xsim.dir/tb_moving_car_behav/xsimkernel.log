@@ -1,0 +1,4 @@
+Running: xsim.dir/tb_moving_car_behav/xsimk -simmode gui -wdb tb_moving_car_behav.wdb -simrunnum 0 -socket 43111
+Design successfully loaded
+Design Loading Memory Usage: 33588 KB (Peak: 34008 KB)
+Design Loading CPU Usage: 80 ms

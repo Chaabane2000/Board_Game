@@ -1,0 +1,39 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  --include "../../../../project_1.gen/sources_1/ip/clk_wiz_0" \
+"../../../../project_1.gen/sources_1/ip/clk_wiz_0/clk_wiz_0_clk_wiz.v" \
+"../../../../project_1.gen/sources_1/ip/clk_wiz_0/clk_wiz_0.v" \
+"../../../../project_1.gen/sources_1/ip/green_car/sim/green_car.v" \
+"../../../../project_1.gen/sources_1/ip/grass/sim/grass.v" \
+"../../../../project_1.gen/sources_1/ip/road1/sim/road1.v" \
+"../../../../project_1.gen/sources_1/ip/road2/sim/road2.v" \
+"../../../../project_1.gen/sources_1/ip/road3/sim/road3.v" \
+"../../../../project_1.gen/sources_1/ip/road4/sim/road4.v" \
+"../../../../project_1.gen/sources_1/ip/road5/sim/road5.v" \
+"../../../../project_1.gen/sources_1/ip/road6/sim/road6.v" \
+"../../../../project_1.gen/sources_1/ip/road8/sim/road8.v" \
+"../../../../project_1.gen/sources_1/ip/road9/sim/road9.v" \
+"../../../../project_1.gen/sources_1/ip/road10/sim/road10.v" \
+"../../../../project_1.gen/sources_1/ip/blk_mem_gen_0/sim/blk_mem_gen_0.v" \
+"../../../../project_1.gen/sources_1/ip/road7/sim/road7.v" \
+
+sv xil_defaultlib  --include "../../../../project_1.gen/sources_1/ip/clk_wiz_0" \
+"../../../../project_1.srcs/sources_1/new/background.sv" \
+"../../../../project_1.srcs/sources_1/new/moving_car.sv" \
+"../../../../project_1.srcs/sources_1/new/vga_out.sv" \
+"../../../../project_1.srcs/sources_1/new/game_top.sv" \
+"../../../../project_1.srcs/sources_1/imports/mankaic/image_rom_reader.sv" \
+"../../../../project_1.srcs/sources_1/imports/mankaic/drawcon.sv" \
+"../../../../project_1.srcs/sources_1/new/collision_mask.sv" \
+"../../../../project_1.srcs/sources_1/new/tile_mask.sv" \
+"../../../../project_1.srcs/sim_1/new/tb_background.sv" \
+"../../../../project_1.srcs/sim_1/new/tb_game_top.sv" \
+"../../../../project_1.srcs/sim_1/imports/mankaic/tb_img_rom_reader.sv" \
+"../../../../project_1.srcs/sim_1/new/test_signals.sv" \
+"../../../../project_1.srcs/sim_1/new/tb_moving_car.sv" \
+"../../../../project_1.srcs/sim_1/new/tb_collision_mask.sv" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

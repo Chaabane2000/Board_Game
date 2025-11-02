@@ -1,0 +1,4 @@
+Running: xsim.dir/tb_collision_mask_behav/xsimk -simmode gui -wdb tb_collision_mask_behav.wdb -simrunnum 0 -socket 41703
+Design successfully loaded
+Design Loading Memory Usage: 33664 KB (Peak: 33976 KB)
+Design Loading CPU Usage: 40 ms

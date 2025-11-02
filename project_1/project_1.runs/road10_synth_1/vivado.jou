@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:47 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Fri Oct 17 02:19:14 2025
+# Process ID: 3791184
+# Current directory: /home/mankaic/Desktop/project_1/project_1.runs/road10_synth_1
+# Command line: vivado -log road10.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source road10.tcl
+# Log file: /home/mankaic/Desktop/project_1/project_1.runs/road10_synth_1/road10.vds
+# Journal file: /home/mankaic/Desktop/project_1/project_1.runs/road10_synth_1/vivado.jou
+#-----------------------------------------------------------
+source road10.tcl -notrace

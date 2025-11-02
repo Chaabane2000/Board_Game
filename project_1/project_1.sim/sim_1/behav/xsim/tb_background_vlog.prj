@@ -1,0 +1,20 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  --include "../../../../project_1.gen/sources_1/ip/clk_wiz_0" \
+"../../../../project_1.gen/sources_1/ip/road7/sim/road7.v" \
+"../../../../project_1.gen/sources_1/ip/road6/sim/road6.v" \
+"../../../../project_1.gen/sources_1/ip/road5/sim/road5.v" \
+"../../../../project_1.gen/sources_1/ip/road4/sim/road4.v" \
+"../../../../project_1.gen/sources_1/ip/road3/sim/road3.v" \
+"../../../../project_1.gen/sources_1/ip/road2/sim/road2.v" \
+"../../../../project_1.gen/sources_1/ip/road1/sim/road1.v" \
+"../../../../project_1.gen/sources_1/ip/grass/sim/grass.v" \
+
+sv xil_defaultlib  --include "../../../../project_1.gen/sources_1/ip/clk_wiz_0" \
+"../../../../project_1.srcs/sources_1/new/background.sv" \
+"../../../../project_1.srcs/sim_1/new/tb_background.sv" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

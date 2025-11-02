@@ -1,0 +1,446 @@
+
+*** Running vivado
+    with args -log game_top.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source game_top.tcl
+
+
+****** Vivado v2020.2 (64-bit)
+  **** SW Build 3064766 on Wed Nov 18 09:12:47 MST 2020
+  **** IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+    ** Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+source game_top.tcl -notrace
+Command: synth_design -top game_top -part xc7a100tcsg324-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Device 21-403] Loading part xc7a100tcsg324-1
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 4 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 384771
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:05 . Memory (MB): peak = 2383.855 ; gain = 0.000 ; free physical = 496406 ; free virtual = 513114
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'game_top' [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/game_top.sv:23]
+INFO: [Synth 8-6157] synthesizing module 'clk_wiz_0' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/clk_wiz_0_stub.v:5]
+INFO: [Synth 8-6155] done synthesizing module 'clk_wiz_0' (1#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/clk_wiz_0_stub.v:5]
+INFO: [Synth 8-6157] synthesizing module 'background' [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/background.sv:23]
+	Parameter TILE_WIDTH bound to: 32 - type: integer 
+	Parameter TILE_HEIGHT bound to: 32 - type: integer 
+	Parameter ADDR_TILES_WIDTH_SIZE bound to: 5 - type: integer 
+	Parameter ADDR_TILES_HEIGHT_SIZE bound to: 5 - type: integer 
+	Parameter NUM_TILES_X bound to: 40 - type: integer 
+	Parameter NUM_TILES_Y bound to: 25 - type: integer 
+	Parameter ADDR_TILES_X_SIZE bound to: 6 - type: integer 
+	Parameter ADDR_TILES_Y_SIZE bound to: 5 - type: integer 
+	Parameter COLOR_WIDTH bound to: 12 - type: integer 
+	Parameter TILE_IDX_WIDTH bound to: 5 - type: integer 
+	Parameter ADDR_WIDTH bound to: 10 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'grass' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/grass_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'grass' (2#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/grass_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road1' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road1_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road1' (3#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road1_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road2' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road2_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road2' (4#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road2_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road3' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road3_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road3' (5#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road3_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road4' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road4_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road4' (6#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road4_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road5' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road5_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road5' (7#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road5_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road6' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road6_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road6' (8#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road6_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'road7' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road7_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'road7' (9#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/road7_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'background' (10#1) [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/background.sv:23]
+INFO: [Synth 8-6157] synthesizing module 'moving_car' [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/moving_car.sv:16]
+	Parameter IMG_WIDTH bound to: 30 - type: integer 
+	Parameter IMG_HEIGHT bound to: 51 - type: integer 
+	Parameter COLOR_WIDTH bound to: 12 - type: integer 
+	Parameter ADDR_WIDTH bound to: 11 - type: integer 
+	Parameter CAR_MASK bound to: 1530'b000000011111111111111110000000000011111111111111111111100000000111111111111111111111111000000111111111111111111111111000001111111111111111111111111100011111111111111111111111111110011111111111111111111111111110011111111111111111111111111110111111111111111111111111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111011111111111111111111111111110011111111111111111111111111110001111111111111111111111111100001111111111111111111111111100000011111111111111111111110000000000111111111111111111000000 
+	Parameter max_x bound to: 1279 - type: integer 
+	Parameter max_y bound to: 799 - type: integer 
+	Parameter step bound to: 1 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'collision_mask' [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/collision_mask.sv:23]
+	Parameter TILE_WIDTH bound to: 32 - type: integer 
+	Parameter TILE_HEIGHT bound to: 32 - type: integer 
+	Parameter NUM_TILES_X bound to: 40 - type: integer 
+	Parameter NUM_TILES_Y bound to: 25 - type: integer 
+	Parameter TILE_IDX_WIDTH bound to: 5 - type: integer 
+	Parameter ADDR_WIDTH bound to: 10 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'tile_mask' [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/tile_mask.sv:23]
+INFO: [Synth 8-6155] done synthesizing module 'tile_mask' (11#1) [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/tile_mask.sv:23]
+INFO: [Synth 8-6155] done synthesizing module 'collision_mask' (12#1) [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/collision_mask.sv:23]
+INFO: [Synth 8-6157] synthesizing module 'green_car' [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/green_car_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'green_car' (13#1) [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/realtime/green_car_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'moving_car' (14#1) [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/moving_car.sv:16]
+INFO: [Synth 8-6157] synthesizing module 'vga_out' [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/vga_out.sv:23]
+INFO: [Synth 8-6155] done synthesizing module 'vga_out' (15#1) [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/vga_out.sv:23]
+INFO: [Synth 8-6155] done synthesizing module 'game_top' (16#1) [/home/mankaic/Desktop/project_1/project_1.srcs/sources_1/new/game_top.sv:23]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:07 . Memory (MB): peak = 2393.902 ; gain = 10.047 ; free physical = 497165 ; free virtual = 513875
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:06 ; elapsed = 00:00:08 . Memory (MB): peak = 2408.746 ; gain = 24.891 ; free physical = 497169 ; free virtual = 513878
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:06 ; elapsed = 00:00:08 . Memory (MB): peak = 2408.746 ; gain = 24.891 ; free physical = 497169 ; free virtual = 513879
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00.11 ; elapsed = 00:00:00.10 . Memory (MB): peak = 2408.746 ; gain = 0.000 ; free physical = 497163 ; free virtual = 513872
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7_90'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7_90'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7_180'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7_180'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7_270'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road7/road7/road7_in_context.xdc] for cell 'bg/r7_270'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/clk_wiz_0/clk_wiz_0/clk_wiz_0_in_context.xdc] for cell 'instance_name'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/clk_wiz_0/clk_wiz_0/clk_wiz_0_in_context.xdc] for cell 'instance_name'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/green_car/green_car/green_car_in_context.xdc] for cell 'green_car/car'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/green_car/green_car/green_car_in_context.xdc] for cell 'green_car/car'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/grass/grass/grass_in_context.xdc] for cell 'bg/gr'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/grass/grass/grass_in_context.xdc] for cell 'bg/gr'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road1/road1/road1_in_context.xdc] for cell 'bg/r1'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road1/road1/road1_in_context.xdc] for cell 'bg/r1'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road1/road1/road1_in_context.xdc] for cell 'bg/r1_180'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road1/road1/road1_in_context.xdc] for cell 'bg/r1_180'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2_90'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2_90'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2_180'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2_180'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2_270'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road2/road2/road2_in_context.xdc] for cell 'bg/r2_270'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3_90'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3_90'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3_180'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3_180'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3_270'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road3/road3/road3_in_context.xdc] for cell 'bg/r3_270'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road4/road4/road4_in_context.xdc] for cell 'bg/r4'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road4/road4/road4_in_context.xdc] for cell 'bg/r4'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road4/road4/road4_in_context.xdc] for cell 'bg/r4_180'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road4/road4/road4_in_context.xdc] for cell 'bg/r4_180'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road5/road5/road5_in_context.xdc] for cell 'bg/r5'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road5/road5/road5_in_context.xdc] for cell 'bg/r5'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6_90'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6_90'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6_180'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6_180'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6_270'
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/road6/road6/road6_in_context.xdc] for cell 'bg/r6_270'
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.srcs/constrs_1/imports/mankaic/nexys-a7-100t-master.xdc]
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.srcs/constrs_1/imports/mankaic/nexys-a7-100t-master.xdc]
+INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [/home/mankaic/Desktop/project_1/project_1.srcs/constrs_1/imports/mankaic/nexys-a7-100t-master.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/game_top_propImpl.xdc].
+Resolution: To avoid this warning, move constraints listed in [.Xil/game_top_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
+Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [/home/mankaic/Desktop/project_1/project_1.runs/synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2584.465 ; gain = 0.000 ; free physical = 497023 ; free virtual = 513732
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.02 . Memory (MB): peak = 2584.465 ; gain = 0.000 ; free physical = 497022 ; free virtual = 513731
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/gr' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r1' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r1_180' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r2' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r2_180' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r2_270' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r2_90' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r3' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r3_180' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r3_270' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r3_90' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r4' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r4_180' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r5' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r6' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r6_180' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r6_270' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r6_90' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r7' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r7_180' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r7_270' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'bg/r7_90' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+WARNING: [Timing 38-316] Clock period '20.000' specified during out-of-context synthesis of instance 'green_car/car' at clock pin 'clka' is different from the actual clock period '11.982', this can lead to different synthesis results.
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:13 ; elapsed = 00:00:16 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 497168 ; free virtual = 513878
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7a100tcsg324-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:13 ; elapsed = 00:00:16 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 497164 ; free virtual = 513874
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property IO_BUFFER_TYPE = NONE for clk. (constraint file  /home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/clk_wiz_0/clk_wiz_0/clk_wiz_0_in_context.xdc, line 3).
+Applied set_property CLOCK_BUFFER_TYPE = NONE for clk. (constraint file  /home/mankaic/Desktop/project_1/project_1.gen/sources_1/ip/clk_wiz_0/clk_wiz_0/clk_wiz_0_in_context.xdc, line 4).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r7. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r7_180. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r7_270. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r7_90. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for instance_name. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for green_car/car. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/gr. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r1. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r1_180. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r2. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r2_180. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r2_270. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r2_90. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r3. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r3_180. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r3_270. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r3_90. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r4. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r4_180. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r5. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r6. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r6_180. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r6_270. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for bg/r6_90. (constraint file  auto generated constraint).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:13 ; elapsed = 00:00:16 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 497170 ; free virtual = 513880
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:15 ; elapsed = 00:00:18 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 497140 ; free virtual = 513850
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input   32 Bit       Adders := 2     
+	   3 Input   13 Bit       Adders := 1     
+	   2 Input   12 Bit       Adders := 1     
+	   3 Input   12 Bit       Adders := 1     
+	   2 Input   11 Bit       Adders := 8     
+	   3 Input   11 Bit       Adders := 1     
+	   2 Input   10 Bit       Adders := 6     
+	   3 Input   10 Bit       Adders := 1     
++---Registers : 
+	               12 Bit    Registers := 4     
+	               11 Bit    Registers := 4     
+	               10 Bit    Registers := 3     
+	                5 Bit    Registers := 2     
+	                1 Bit    Registers := 2     
++---Muxes : 
+	   8 Input   32 Bit        Muxes := 504   
+	   2 Input   12 Bit        Muxes := 17    
+	   2 Input   11 Bit        Muxes := 6     
+	   2 Input   10 Bit        Muxes := 3     
+	   4 Input    5 Bit        Muxes := 42    
+	   8 Input    4 Bit        Muxes := 21    
+	   2 Input    4 Bit        Muxes := 3     
+	   8 Input    3 Bit        Muxes := 21    
+	   2 Input    1 Bit        Muxes := 4     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 240 (col length:80)
+BRAMs: 270 (col length: RAMB18 80 RAMB36 40)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+DSP Report: Generating DSP addr_comb_900, operation Mode is: C+A*(B:0x1e).
+DSP Report: operator addr_comb_900 is absorbed into DSP addr_comb_900.
+DSP Report: operator addr_comb_901 is absorbed into DSP addr_comb_900.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:28 ; elapsed = 00:00:32 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 497113 ; free virtual = 513841
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+ROM: Preliminary Mapping	Report
++------------+--------------------+---------------+----------------+
+|Module Name | RTL Object         | Depth x Width | Implemented As | 
++------------+--------------------+---------------+----------------+
+|game_top    | u_mask_r2_270/mask | 32x20         | LUT            | 
+|game_top    | u_mask_r2_180/mask | 32x20         | LUT            | 
+|game_top    | u_mask_r2_90/mask  | 32x20         | LUT            | 
+|game_top    | u_mask_r2/mask     | 32x20         | LUT            | 
++------------+--------------------+---------------+----------------+
+
+
+DSP: Preliminary Mapping	Report (see note below)
++------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name | DSP Mapping  | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|moving_car  | C+A*(B:0x1e) | 11     | 5      | 10     | -      | 11     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
++------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:35 ; elapsed = 00:00:40 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496976 ; free virtual = 513704
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:35 ; elapsed = 00:00:40 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496958 ; free virtual = 513686
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:36 ; elapsed = 00:00:41 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496958 ; free virtual = 513686
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496955 ; free virtual = 513682
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496955 ; free virtual = 513683
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496951 ; free virtual = 513679
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496949 ; free virtual = 513677
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496960 ; free virtual = 513688
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496963 ; free virtual = 513691
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++------+--------------+----------+
+|      |BlackBox name |Instances |
++------+--------------+----------+
+|1     |clk_wiz_0     |         1|
+|2     |grass         |         1|
+|3     |road1         |         2|
+|4     |road2         |         4|
+|5     |road3         |         4|
+|6     |road4         |         2|
+|7     |road5         |         1|
+|8     |road6         |         4|
+|9     |road7         |         4|
+|10    |green_car     |         1|
++------+--------------+----------+
+
+Report Cell Usage: 
++------+----------+------+
+|      |Cell      |Count |
++------+----------+------+
+|1     |clk_wiz   |     1|
+|2     |grass     |     1|
+|3     |green_car |     1|
+|4     |road1     |     1|
+|5     |road1_    |     1|
+|6     |road2     |     1|
+|7     |road2_    |     3|
+|10    |road3     |     1|
+|11    |road3_    |     3|
+|14    |road4     |     1|
+|15    |road4_    |     1|
+|16    |road5     |     1|
+|17    |road6     |     1|
+|18    |road6_    |     3|
+|21    |road7     |     1|
+|22    |road7_    |     3|
+|25    |CARRY4    |    35|
+|26    |DSP48E1   |     1|
+|27    |LUT1      |    21|
+|28    |LUT2      |   111|
+|29    |LUT3      |    59|
+|30    |LUT4      |   146|
+|31    |LUT5      |   165|
+|32    |LUT6      |   346|
+|33    |MUXF7     |    30|
+|34    |MUXF8     |     2|
+|35    |FDRE      |   146|
+|36    |FDSE      |     7|
+|37    |IBUF      |     5|
+|38    |OBUF      |    14|
++------+----------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 496959 ; free virtual = 513687
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:35 ; elapsed = 00:00:40 . Memory (MB): peak = 2588.434 ; gain = 24.891 ; free physical = 497027 ; free virtual = 513755
+Synthesis Optimization Complete : Time (s): cpu = 00:00:39 ; elapsed = 00:00:44 . Memory (MB): peak = 2588.434 ; gain = 204.578 ; free physical = 497033 ; free virtual = 513761
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2588.434 ; gain = 0.000 ; free physical = 497107 ; free virtual = 513834
+INFO: [Netlist 29-17] Analyzing 68 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2600.340 ; gain = 0.000 ; free physical = 497054 ; free virtual = 513782
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Common 17-83] Releasing license: Synthesis
+47 Infos, 23 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:48 ; elapsed = 00:00:51 . Memory (MB): peak = 2600.340 ; gain = 216.484 ; free physical = 497200 ; free virtual = 513928
+WARNING: [Runs 36-115] Could not delete directory '/home/mankaic/Desktop/project_1/project_1.runs/synth_1/.Xil/Vivado-384334-rsws08.kaust.edu.sa/dcp0'.
+INFO: [Common 17-1381] The checkpoint '/home/mankaic/Desktop/project_1/project_1.runs/synth_1/game_top.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file game_top_utilization_synth.rpt -pb game_top_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Sun Nov  2 15:50:14 2025...

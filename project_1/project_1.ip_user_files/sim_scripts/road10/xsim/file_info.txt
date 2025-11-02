@@ -1,0 +1,2 @@
+road10.v,verilog,xil_defaultlib,../../../../project_1.gen/sources_1/ip/road10/sim/road10.v,
+glbl.v,Verilog,xil_defaultlib,glbl.v

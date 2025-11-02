@@ -1,0 +1,15 @@
+Vivado Simulator 2020.2
+Copyright 1986-1999, 2001-2020 Xilinx, Inc. All Rights Reserved.
+Running: /sw/workstations/apps/linux-ubuntu22.04-ivybridge/xilinx/2020.2/gcc-11.3.0/ekwesbbm3ihgiun3hq4k3jqblkshewa7/Vivado/2020.2/bin/unwrapped/lnx64.o/xelab -wto 051d06ddf2d64e5f91f1ef90c01ee499 --incr --debug typical --relax --mt 8 -L xil_defaultlib -L blk_mem_gen_v8_4_4 -L uvm -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot tb_collision_mask_behav xil_defaultlib.tb_collision_mask xil_defaultlib.glbl -log elaborate.log 
+Using 8 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.tile_mask
+Compiling module xil_defaultlib.collision_mask
+Compiling module xil_defaultlib.tb_collision_mask
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_collision_mask_behav
