@@ -4,7 +4,9 @@ Created on Sun Nov  2 11:26:27 2025
 
 @author: mankaic
 """
-
+# This script creates binary masks out of images
+# INPUT: Image to be converted into mask (Preferably color allowable area with white and prohibited area with black)
+# OUTPUT: Binary matrix saved in .txt file
 from PIL import Image
 import numpy as np
 
