@@ -22,13 +22,28 @@
 
 module game_top(
     //inputs
-    input clk, rst, in_up, in_down, in_left, in_right,
+    input clk, rst, in_up_bn, in_down_bn, in_left_bn, in_right_bn,
+    input PS2_CLK, PS2_DATA,
+    output logic aud_pwm,   
+    output logic aud_sd,     
     //outputs
     output reg [3:0] pix_r,
     output reg [3:0] pix_g,
     output reg [3:0] pix_b,
     output hsync,
-    output vsync
+    output vsync,
+    // 7-segment cathodes
+    output logic CA,
+    output logic CB,
+    output logic CC,
+    output logic CD,
+    output logic CE,
+    output logic CF,
+    output logic CG,
+    output logic DP,
+
+    // 7-segment anodes (digits)
+    output logic [7:0] AN
     //output [10:0] curr_x, // for simulation, comment when implementing on FPGA
     //output [9:0] curr_y // for simulation, comment when implementing on FPGA
     );
@@ -40,6 +55,23 @@ module game_top(
     .clk_out1(pixclk),     // output clk_out1
    // Clock in ports
     .clk_in1(clk));      // input clk_in1
+    logic in_up_key, in_down_key, in_left_key, in_right_key, in_space_key;
+    keyboard_arrows keyboard(
+    .clk(clk),         // system clock
+    .ps2_clk(PS2_CLK),     // PS2 clock input
+    .ps2_data(PS2_DATA),    // PS2 data input
+    .up(in_up_key),
+    .down(in_down_key),
+    .left(in_left_key),
+    .right(in_right_key),
+    .space(in_space_key)
+    );
+    
+    logic in_up, in_down, in_left, in_right;
+    assign in_up = in_up_key || in_up_bn;
+    assign in_down = in_down_key || in_down_bn;
+    assign in_left = in_left_key || in_left_key;
+    assign in_right = in_right_key || in_right_key;
     
     logic [10:0] curr_x; // for implementation, comment when simulating
     logic [9:0] curr_y; // for implementation, comment when simulating
@@ -86,7 +118,7 @@ module game_top(
    
     // Create 40x25 background tilemap 
     //logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
-    logic [4:0] tilemap [0:24][0:39];
+    logic [5:0] tilemap [0:24][0:39];
 
     initial begin
         integer i, j;
@@ -146,6 +178,13 @@ module game_top(
         tilemap[19][11] = 5'd17;
         tilemap[18][11] = 5'd13;
         tilemap[17][12] = 5'd21;
+        
+        //start line
+        tilemap[5][19] = 5'd22;
+        tilemap[6][19] = 5'd23;
+        tilemap[7][19] = 5'd24;
+        tilemap[6][18] = 5'd25;
+        
        
     end
     
@@ -170,8 +209,87 @@ module game_top(
     //                 .in_pix_r(4'b0000), .in_pix_g(4'b0000), .in_pix_b(4'b1111),
     //                 .o_pix_r(pix_wire_r_2), .o_pix_g(pix_wire_g_2), .o_pix_b(pix_wire_b_2));                    
     
+    logic [10:0] x_pos;
+    logic [9:0] y_pos;
+    logic [3:0] speed;
+    logic [3:0] accel_flag;
+    localparam slowSpeed = 0,  highSpeed= 1;
+
+    assign accel_flag = {in_right, in_left, in_down, in_up};
     
-    moving_car green_car(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .bg_color({pix_wire_r_2, pix_wire_g_2, pix_wire_b_2}), .in_up(in_up), .in_down(in_down), .in_left(in_left), .in_right(in_right), .tilemap(tilemap), .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1));
+    moving_car_states green_car(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .accel_flag(accel_flag), .bg_color({pix_wire_r_2, pix_wire_g_2, pix_wire_b_2}), .in_up(in_up), .in_down(in_down), .in_left(in_left), .in_right(in_right), .tilemap(tilemap), .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1), .y_pos(y_pos), .x_pos(x_pos));
+    
+    // Calculate score
+    logic [3:0] ones, tens, hundreds;
+    logic crossed_line;
+    logic [9:0] lap_time;
+    logic started = 0;
+    score lap_timer (
+        .clk(clk),
+        .rst(rst),
+        .x_pos(x_pos),
+        .y_pos(y_pos),
+        .crossed_line(crossed_line),
+        .lap_time(lap_time),
+        .started(started),
+        .ones(ones),
+        .tens(tens),
+        .hundreds(hundreds)
+    );
+    
+    // Display
+    
+    multidigit dgt (
+        .clk(clk),
+        .rst(rst),          
+        .dig7(4'b0000), .dig6(4'b0000), .dig5(4'b0000), .dig4(4'b0000), .dig3(4'b0000), .dig2(hundreds), .dig1(tens), .dig0(ones), 
+        .a(CA), .b(CB), .c(CC), .d(CD), .e(CE), .f(CF), .g(CG),
+        .dp(DP),
+        .an(AN)
+    );
+    
+    // Show score in the middle of the screen
+    
+    always @(*) begin
+        // When the line is crossed, show letters
+        if (crossed_line && started) begin
+            tilemap[12][13] = 26;   // 'L'
+            tilemap[12][14] = 27;    // 'A'
+            tilemap[12][15] = 28;   // 'P'
+            tilemap[12][17] = 29;   // 'T'
+            tilemap[12][18] = 30;   // 'I'
+            tilemap[12][19] = 31;   // 'M'
+            tilemap[12][20] = 32;   // 'E'
+            tilemap[12][21] = 33;   // ':'
+            tilemap[12][23] = 35 + hundreds;   // output hundreds digit
+            tilemap[12][24] = 35 + tens;       // output tens digit
+            tilemap[12][25] = 35 + ones;       // output ones digit
+            tilemap[12][26] = 34;   // 'S'   
+        end
+    
+        // After 3 seconds, clear the tiles
+        if (lap_time > 3) begin
+            tilemap[12][13] = 0;   
+            tilemap[12][14] = 0;    
+            tilemap[12][15] = 0;   
+            tilemap[12][17] = 0;   
+            tilemap[12][18] = 0;  
+            tilemap[12][19] = 0;  
+            tilemap[12][20] = 0;   
+            tilemap[12][21] = 0;  
+            tilemap[12][23] = 0;   
+            tilemap[12][24] = 0; 
+            tilemap[12][25] = 0; 
+            tilemap[12][26] = 0;  
+        end
+    end
+    
+    // Audio test
+    /*audio_test (
+        .clk(clk),      
+        .aud_pwm(aud_pwm),  
+        .aud_sd(aud_sd)    
+    );*/
     
     vga_out vga (.clk(pixclk), .pix_in_r(pix_wire_r_1), .pix_in_g(pix_wire_g_1), .pix_in_b(pix_wire_b_1),.pix_r(pix_r), .pix_g(pix_g), .pix_b(pix_b), .hsync(hsync), .vsync(vsync), .curr_x(curr_x), .curr_y(curr_y));
 

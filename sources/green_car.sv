@@ -196,7 +196,7 @@ module moving_car#(
     always_comb begin
         if (read_mem_en)
             addr_comb_90 = ((IMG_HEIGHT - 1) - x_rel) * IMG_WIDTH + y_rel;
-            //addr_comb = y_rel * IMG_WIDTH + x_rel;
+            addr_comb = y_rel * IMG_WIDTH + x_rel;
         else
             addr_comb_90 = '0;
     end
