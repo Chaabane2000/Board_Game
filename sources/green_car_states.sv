@@ -104,21 +104,22 @@ module moving_car_states#(
         IMG_WIDTH = IMG_WIDTH_H;
         IMG_HEIGHT = IMG_HEIGHT_H;
         bram_data = bram_data_u;
+       
         case(curr_state)
             up_st:begin
                 IMG_HEIGHT = IMG_HEIGHT_H;
                 IMG_WIDTH = IMG_WIDTH_H;
                 bram_data = bram_data_u;
-                if(in_down&~in_up&~in_left&~in_right && rot_v)begin
+                if(in_down&~in_up&~in_left&~in_right && rot_v && ~stuck)begin
                     next_state = right_st;
                 end
-                else if(in_up&~in_down&~in_left&~in_right && rot_v)begin
+                else if(in_up&~in_down&~in_left&~in_right && rot_v && ~stuck)begin
                     next_state = left_st;
                 end
-                else if(~in_up&in_down&~in_left&in_right && rot_d)begin
+                else if(~in_up&in_down&~in_left&in_right && rot_d && ~stuck)begin
                     next_state = diagonal_ru_s;
                 end
-                else if(in_up&~in_down&~in_left&in_right && rot_d)begin
+                else if(in_up&~in_down&~in_left&in_right && rot_d && ~stuck)begin
                     next_state = diagonal_lu_s;
                 end
 
@@ -127,16 +128,16 @@ module moving_car_states#(
                 IMG_HEIGHT = IMG_HEIGHT_H;
                 IMG_WIDTH = IMG_WIDTH_H;
                 bram_data = bram_data_d;
-                if(in_down&~in_up&~in_left&~in_right && rot_v)begin
+                if(in_down&~in_up&~in_left&~in_right && rot_v && ~stuck)begin
                     next_state = right_st;
                 end
-                else if(in_up&~in_down&~in_left&~in_right && rot_v)begin
+                else if(in_up&~in_down&~in_left&~in_right && rot_v && ~stuck)begin
                     next_state = left_st;
                 end
-                else if(~in_up&in_down&in_left&~in_right && rot_d)begin
+                else if(~in_up&in_down&in_left&~in_right && rot_d && ~stuck)begin
                     next_state = diagonal_rd_s;
                 end
-                else if(in_up&~in_down&in_left&~in_right && rot_d)begin
+                else if(in_up&~in_down&in_left&~in_right && rot_d && ~stuck)begin
                     next_state = diagonal_ld_s;
                 end
             end
@@ -144,16 +145,16 @@ module moving_car_states#(
                 IMG_HEIGHT = IMG_HEIGHT_V;
                 IMG_WIDTH = IMG_WIDTH_V;
                 bram_data = bram_data_l;
-                if(in_right&~in_left&~in_up&~in_down && rot_h)begin
+                if(in_right&~in_left&~in_up&~in_down && rot_h && ~stuck)begin
                     next_state = up_st;
                 end
-                else if(in_left&~in_right&~in_up&~in_down && rot_h)begin
+                else if(in_left&~in_right&~in_up&~in_down && rot_h && ~stuck)begin
                     next_state = down_st;
                 end
-                else if(~in_left&in_right&in_up&~in_down && rot_d)begin
+                else if(~in_left&in_right&in_up&~in_down && rot_d && ~stuck)begin
                     next_state = diagonal_lu_s;
                 end
-                else if(in_left&~in_right&in_up&~in_down && rot_d)begin
+                else if(in_left&~in_right&in_up&~in_down && rot_d && ~stuck)begin
                     next_state = diagonal_ld_s;
                 end
             end
@@ -221,6 +222,7 @@ module moving_car_states#(
             end
 
         endcase
+        
     end
     // Compute next coordinates (combinational)
     always_comb begin
@@ -253,51 +255,79 @@ module moving_car_states#(
         end
             
     end
-    
-
+    logic stuck;
+    logic [9:0] stuck_counter;
+    logic is_moving, blink;
+    logic up_trigger, down_trigger, left_trigger, right_trigger;
+    assign is_moving = in_up || in_down || in_left || in_right;
+    assign blink = stuck_counter[3];
+    localparam incrementer = 2**14;
     always_ff @(posedge clk ) begin
         if (~rst)
         begin
             div_counter <= 0;
-            x_pos <= 576; //416;
+            x_pos <= 576;
             y_pos <= 192;
             speed_counter <= slow_countervalue;
+            stuck <= 0;
+            stuck_counter <= 0;
         end
         else
-        begin      
-            else if(div_counter >= speed_counter)//game logic
+        begin
+            if(div_counter >= speed_counter)//game logic tick
             begin
                 // When accel_flag is high, decrease counter for more speed.
                 // When accel_flag is low, increase counter for less speed.
-                localparam incrementer = 2**14;
-                speed_counter <= (accel_flag != 0) ? (speed_counter > fast_countervalue ? speed_counter - incrementer : fast_countervalue) : (speed_counter < slow_countervalue ? speed_counter + incrementer : slow_countervalue);
+                if(speed_counter < slow_countervalue )
+                begin
+                    if (in_up)
+                        up_trigger <= 1;
+                    else if(in_down)
+                        down_trigger <= 1;
+                    else if(in_left)
+                        left_trigger <= 1;
+                    else if(in_right)
+                        right_trigger <= 1;
+                end
+                else
+                begin
+                    up_trigger <= 0;
+                    down_trigger <= 0;
+                    left_trigger <= 0;
+                    right_trigger <= 0;
+                end
+
+                
+                speed_counter <= (accel_flag != 0 && is_moving) ? (speed_counter > fast_countervalue ? speed_counter - incrementer : fast_countervalue) : (speed_counter < slow_countervalue ? speed_counter + incrementer : slow_countervalue);
                 div_counter <= 0;
-                //move up
-                if(in_up && walkable1)
-                begin
-                    if (signed'(y_pos - step) > 0)
-                        y_pos <= y_pos - step;
-                end
-                //move down
-                if(in_down && walkable1)
-                begin
-                    if ((y_pos + step) < max_y)
-                        y_pos <= y_pos + step;
-                end
-                //move left
-                if(in_left && walkable1)
-                begin
-                    if (signed'(x_pos - step) > 0)
-                        x_pos <= x_pos - step;
-                end
-                //move right
-                if(in_right && walkable1)
-                begin
-                    if ((x_pos + step) < max_x)
-                        x_pos <= x_pos + step;
+
+                if (stuck) begin
+                    speed_counter <= slow_countervalue;
+                    if (stuck_counter > 0)
+                        stuck_counter <= stuck_counter - 1;
+                    else
+                        stuck <= 0;
+                end else begin
+                    
+                    if (is_moving && ~walkable1 && stuck == 0) begin
+                        stuck <= 1;
+                        stuck_counter <= 500;
+                    end else begin
+                        //move up
+                        if((up_trigger||in_up) && walkable1 && signed'(y_pos - step) > 0)
+                            y_pos <= y_pos - step;
+                        //move down
+                        if((down_trigger || in_down) && walkable1 && (y_pos + step) < max_y)
+                            y_pos <= y_pos + step;
+                        //move left
+                        if((left_trigger || in_left) && walkable1 && signed'(x_pos - step) > 0)
+                            x_pos <= x_pos - step;
+                        //move right
+                        if((right_trigger || in_right) && walkable1 && (x_pos + step) < max_x)
+                            x_pos <= x_pos + step;
+                    end
                 end
             end
-
             else
                 div_counter<=div_counter+1;
         end
@@ -388,7 +418,7 @@ module moving_car_states#(
     // --- Output pipeline ---
     logic [COLOR_WIDTH-1:0] stage1, stage2;
     // assign mask_bit = CAR_MASK[addr_comb_90];
-    assign mask_bit = bram_data != 0;
+    assign mask_bit = bram_data != 0 && ~blink;
     always_ff @(posedge clk) begin
         if (~rst) begin
             stage1 <= bg_color;
