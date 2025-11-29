@@ -81,13 +81,34 @@ def image_to_coe(image_path, target_width=None):
         print(f"Error writing file: {e}")
 
 
-# === Example usage ===
+# === Main execution block ===
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python image_to_coe_argb.py <image_path> [width]")
+        print("Usage: python image_to_coe_argb.py <path_to_image_or_folder> [width]")
         sys.exit(1)
 
-    image_path = sys.argv[1]
+    input_path = sys.argv[1]
     target_width = int(sys.argv[2]) if len(sys.argv) > 2 else None
 
-    image_to_coe(image_path, target_width)
+    # Supported image extensions
+    supported_extensions = {".png", ".jpg", ".jpeg", ".bmp", ".gif"}
+
+    if os.path.isfile(input_path):
+        # Process a single image file
+        image_to_coe(input_path, target_width)
+        
+    elif os.path.isdir(input_path):
+        # Process all images in a directory
+        print(f"📁 Processing all images in folder: {input_path}\n")
+        
+        for item in os.listdir(input_path):
+            # Check if the file has a supported extension
+            if os.path.splitext(item)[1].lower() in supported_extensions:
+                
+                image_path = os.path.join(input_path, item)
+                print(f"--- Processing: {item} ---")
+                image_to_coe(image_path, target_width)
+                print("-" * (len(item) + 16) + "\n") # Separator
+    else:
+        print(f"❌ Error: Path not found or not a file/directory: '{input_path}'")
+        sys.exit(1)

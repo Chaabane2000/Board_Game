@@ -1,16 +1,8 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 10/17/2025 04:00:19 PM
-// Design Name: 
-// Module Name: moving_car
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: Car sprite renderer with proper BRAM pipeline
-// 
+// Module Name: moving_car_states
+// Description: Car sprite renderer with proper Alpha Blending (ARGB4444)
+//              State transitions are now calculated from the Sprite Center.
 //////////////////////////////////////////////////////////////////////////////////
 
 module moving_car_states#(
@@ -20,17 +12,18 @@ module moving_car_states#(
     parameter IMG_HEIGHT_V  = 29,
     parameter IMG_WIDTH_D   = 51,
     parameter IMG_HEIGHT_D  = 51,
-    parameter COLOR_WIDTH = 12,   // e.g., RGB444
-    parameter ADDR_WIDTH  = 12
+    parameter COLOR_WIDTH   = 16,   // ARGB4444 (16 bits total)
+    parameter ADDR_WIDTH    = 12
     
 )(
     input  logic         clk,
     input  logic         rst,
     input  logic [10:0]  curr_x,
     input  logic [9:0]   curr_y,
-    input  logic [COLOR_WIDTH-1:0] bg_color, // background color
+    input  logic [COLOR_WIDTH-1:0] bg_color, // Background input
     input logic in_up, in_down, in_left, in_right,
-    input logic [5:0] tilemap [0:24][0:39],
+    input logic [6:0] tilemap [0:24][0:39],
+    input logic swtch,
     input logic accel_flag,
 
     output logic [3:0]   o_pix_r,
@@ -65,21 +58,28 @@ module moving_car_states#(
     logic walkable1, walkable2, walkable3, walkable4;
     logic walkable_next1, walkable_next2, walkable_next3, walkable_next4;
 
+    // --- Bounding Box Collision Masks (For Movement Limits) ---
+    // These still check corners to prevent the car from phasing into walls
     collision_mask u_collision_mask1 (.curr_x(next_x), .curr_y(next_y), .tilemap(tilemap), .walkable(walkable_next1));
     collision_mask u_collision_mask2 (.curr_x(next_x + IMG_WIDTH), .curr_y(next_y), .tilemap(tilemap), .walkable(walkable_next2));
     collision_mask u_collision_mask3 (.curr_x(next_x), .curr_y(next_y + IMG_HEIGHT), .tilemap(tilemap), .walkable(walkable_next3));
     collision_mask u_collision_mask4 (.curr_x(next_x + IMG_WIDTH), .curr_y(next_y + IMG_HEIGHT), .tilemap(tilemap), .walkable(walkable_next4));
     
-    //logic walkable = walkable1, && walkable2 && walkable3 && walkable4;
-    
+    // --- Center Calculation for Rotation ---
+    logic [10:0] center_x;
+    logic [9:0]  center_y;
+    // Calculate Center: TopLeft + (Dimension / 2)
+    assign center_x = x_pos + {5'd0, IMG_WIDTH[5:1]}; 
+    assign center_y = y_pos + {4'd0, IMG_HEIGHT[5:1]};
+
     logic rot_h, rot_v, rot_d;
 
-    collision_mask u1(.curr_x(x_pos + IMG_WIDTH),       .curr_y(y_pos),            .tilemap(tilemap), .walkable(rot_h));
-    collision_mask u2(.curr_x(x_pos),               .curr_y(y_pos + IMG_HEIGHT),   .tilemap(tilemap), .walkable(rot_v));
-    collision_mask u3(.curr_x(x_pos + IMG_WIDTH),       .curr_y(y_pos + IMG_HEIGHT),  .tilemap(tilemap), .walkable(rot_d));
+    // --- Rotation Probes ---
+    // These now check the CENTER of the sprite to determine if a state change (turn) is valid.
+    collision_mask u1(.curr_x(center_x), .curr_y(center_y), .tilemap(tilemap), .walkable(rot_h));
+    collision_mask u2(.curr_x(center_x), .curr_y(center_y), .tilemap(tilemap), .walkable(rot_v));
+    collision_mask u3(.curr_x(center_x), .curr_y(center_y), .tilemap(tilemap), .walkable(rot_d));
 
-    //logic walkable_rot = walk1 && walk2 && walk3;
-    
     state_car curr_state, next_state;
 
     always_ff @(posedge clk) begin
@@ -255,6 +255,30 @@ module moving_car_states#(
         end
             
     end
+    
+    // ---- sync + edge detect for external switch 'swtch' ----
+    logic sw_sync0, sw_sync1, sw_prev;
+    logic sw_change_pulse; // 1-cycle pulse when swtch changes (rising OR falling)
+    
+    always_ff @(posedge clk or negedge rst) begin
+        if (~rst) begin
+            sw_sync0 <= 1'b0;
+            sw_sync1 <= 1'b0;
+            sw_prev  <= 1'b0;
+            sw_change_pulse <= 1'b0;
+        end else begin
+            // 2-stage synchronizer
+            sw_sync0 <= swtch;
+            sw_sync1 <= sw_sync0;
+    
+            // one-cycle pulse on any edge
+            sw_change_pulse <= (sw_sync1 ^ sw_prev);
+    
+            // store previous synchronized state for next edge detection
+            sw_prev <= sw_sync1;
+        end
+    end
+
     logic stuck;
     logic [9:0] stuck_counter;
     logic is_moving, blink;
@@ -263,7 +287,7 @@ module moving_car_states#(
     assign blink = stuck_counter[3];
     localparam incrementer = 2**14;
     always_ff @(posedge clk ) begin
-        if (~rst)
+        if (~rst || sw_change_pulse)
         begin
             div_counter <= 0;
             x_pos <= 576;
@@ -337,8 +361,8 @@ module moving_car_states#(
     logic [10:0] x_rel;
     logic [9:0]  y_rel;
     logic read_mem_en;
-    logic mask_bit;
-
+    
+    // Check if the current pixel scan is inside the car's bounding box
     assign read_mem_en = (curr_x >= x_pos) && (curr_y >= y_pos) &&
                          (curr_x < x_pos + IMG_HEIGHT) && (curr_y < y_pos + IMG_WIDTH);
 
@@ -354,10 +378,8 @@ module moving_car_states#(
     always_comb begin
         if (read_mem_en)
             addr_comb_90 = ((IMG_HEIGHT - 1) - x_rel) * IMG_WIDTH + y_rel;
-            // addr_comb = y_rel * IMG_WIDTH + x_rel;
         else
             addr_comb_90 = '0;
-            // addr_comb = 0;
     end
 
     always_ff @(posedge clk) begin
@@ -373,6 +395,8 @@ module moving_car_states#(
     // --- BRAM interface ---
     logic [COLOR_WIDTH-1:0] bram_data;
     logic [COLOR_WIDTH-1:0] bram_data_u, bram_data_d, bram_data_r, bram_data_l, bram_data_ru, bram_data_rd, bram_data_lu, bram_data_ld;
+    
+    // Note: Ensure your Block Memory Generators are set to width 16 for ARGB support
     car_green_u car_u (
         .clka(clk),
         .addra(addr_reg),
@@ -415,21 +439,54 @@ module moving_car_states#(
         .douta(bram_data_ld)
     );
 
-    // --- Output pipeline ---
-    logic [COLOR_WIDTH-1:0] stage1, stage2;
-    // assign mask_bit = CAR_MASK[addr_comb_90];
-    assign mask_bit = bram_data != 0 && ~blink;
-    always_ff @(posedge clk) begin
-        if (~rst) begin
-            stage1 <= bg_color;
-            stage2 <= bg_color;
-        end else begin
-            //stage1 <= (read_mem_en_reg && mask_bit) ? bram_data : bg_color;
-            stage1 <= (mask_bit) ? bram_data : bg_color;
-            stage2 <= stage1;
-        end
+    // =========================================================================
+    // --- Output Pipeline with Alpha Blending ---
+    // =========================================================================
+    
+    // 1. Separate channels
+    // Assuming ARGB format (4 bits each)
+    logic [3:0] fg_a, fg_r, fg_g, fg_b; // Foreground (Sprite)
+    logic [3:0] bg_r, bg_g, bg_b;       // Background
+    
+    assign {fg_a, fg_r, fg_g, fg_b} = bram_data; 
+    
+    // Extract RGB from background (Assuming BG input is lower 12 bits)
+    assign {bg_r, bg_g, bg_b}       = bg_color[11:0];
+
+    // 2. Calculate Effective Alpha
+    // We only use the sprite's alpha if:
+    //   a. We are reading valid memory (read_mem_en_reg)
+    //   b. We are NOT blinking (collision/stuck effect)
+    logic [3:0] alpha_eff;
+    assign alpha_eff = (read_mem_en_reg && ~blink) ? fg_a : 4'd0;
+    
+    // 3. Inverse Alpha (for background)
+    logic [3:0] inv_alpha;
+    assign inv_alpha = 4'd15 - alpha_eff;
+
+    // 4. Blending Calculation (Combinational)
+    // Formula: (FG * Alpha) + (BG * (15-Alpha))
+    // Max Result: 15*15 + 15*0 = 225. Fits in 8 bits, but using 9 for safety.
+    logic [8:0] r_mixed, g_mixed, b_mixed;
+    
+    always_comb begin
+        r_mixed = (fg_r * alpha_eff) + (bg_r * inv_alpha);
+        g_mixed = (fg_g * alpha_eff) + (bg_g * inv_alpha);
+        b_mixed = (fg_b * alpha_eff) + (bg_b * inv_alpha);
     end
 
-    assign {o_pix_r, o_pix_g, o_pix_b} = stage2;
+    // 5. Output Register (Divide by 16 via shift)
+    always_ff @(posedge clk) begin
+        if (~rst) begin
+            o_pix_r <= 0;
+            o_pix_g <= 0;
+            o_pix_b <= 0;
+        end else begin
+            // Take bits [7:4] effectively divides by 16
+            o_pix_r <= r_mixed[7:4]; 
+            o_pix_g <= g_mixed[7:4];
+            o_pix_b <= b_mixed[7:4];
+        end
+    end
 
 endmodule
