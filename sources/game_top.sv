@@ -1,22 +1,11 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 10/05/2025 11:25:17 AM
-// Design Name: 
 // Module Name: game_top
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Description: Top Level Module
+//              FIXED: Audio Logic now MIXES Win Sound with Music correctly.
+//              FIXED: Added CDC (Toggle) logic to reliably catch fast game events.
+//              FIXED: Added SW[15] debug trigger.
+//              FIXED: Audio mixing logic to prevent clipping (High Frequency Whistle).
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -24,9 +13,9 @@ module game_top(
     //inputs
     input clk, rst, in_up_bn, in_down_bn, in_left_bn, in_right_bn, in_center,
     input PS2_CLK, PS2_DATA,
-    input SW0, SW1,SW2,
+    input [15:0] SW, // Changed to vector to support SW[15]
     output logic aud_pwm,   
-    output logic aud_sd,     
+    output logic aud_sd,      
     //outputs
     output reg [3:0] pix_r,
     output reg [3:0] pix_g,
@@ -45,8 +34,6 @@ module game_top(
 
     // 7-segment anodes (digits)
     output logic [7:0] AN
-    //output [10:0] curr_x, // for simulation, comment when implementing on FPGA
-    //output [9:0] curr_y // for simulation, comment when implementing on FPGA
     );
     
     wire pixclk;
@@ -58,8 +45,8 @@ module game_top(
     .clk_in1(clk));      // input clk_in1
     logic in_up_key, in_down_key, in_left_key, in_right_key, in_space_key;
     keyboard_arrows keyboard(
-    .clk(clk),         // system clock
-    .ps2_clk(PS2_CLK),     // PS2 clock input
+    .clk(clk),          // system clock
+    .ps2_clk(PS2_CLK),      // PS2 clock input
     .ps2_data(PS2_DATA),    // PS2 data input
     .up(in_up_key),
     .down(in_down_key),
@@ -79,47 +66,8 @@ module game_top(
     logic [3:0] pix_wire_r_0, pix_wire_g_0, pix_wire_b_0;
     logic [3:0] pix_wire_r_1, pix_wire_g_1, pix_wire_b_1;
     logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
-    //logic [3:0] tree_r, tree_g, tree_b;
-    //assign {pix_wire_r_0, pix_wire_g_0, pix_wire_b_0} = 12'h000;
-    //assign {pix_wire_r_1, pix_wire_g_1, pix_wire_b_1} = 12'h000;
-    //assign {pix_wire_r_2, pix_wire_g_2, pix_wire_b_2} = 12'h000;
-    
-    // This is not correct, you can remove it or fix 
-    // abdo: fixed now :)
-    // always_comb
-    // begin
-    //     //maybe look meaningless but to avoid creating latch
-    //     pix_wire_r = 4'b0000;
-    //     pix_wire_g = 4'b0000;
-    //     pix_wire_b = 4'b0000;
-        
-    //     if (520<curr_x && curr_x<760 && 300<curr_y && curr_y<500)
-    //     begin
-    //         pix_wire_r = 4'b1111;
-    //         pix_wire_g = 4'b0000;
-    //         pix_wire_b = 4'b0000;
-    //     end
-    //     else
-    //     begin
-    //         pix_wire_r = 4'b0000;
-    //         pix_wire_g = 4'b0000;
-    //         pix_wire_b = 4'b0000;
-    //     end
-            
-    // end
-    
-//    logic [3:0] pix_wire_r_1, pix_wire_g_1, pix_wire_b_1;
-//     drawcon red_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
-//                     .in_pos_y(y_pos), .in_width_y(100), .draw_y(curr_y),
-//                     .bg_color({pix_wire_r_0, pix_wire_g_0, pix_wire_b_0}), 
-//                     .in_pix_r(4'b1111), .in_pix_g(4'b0000), .in_pix_b(4'b0000),
-//                     .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1));
-//    image_rom_reader img(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .pos_x(x_pos), .pos_y(y_pos), .bg_color({pix_wire_r_0, pix_wire_g_0, pix_wire_b_0}),
-//                        .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1));
-    
    
     // Create 40x25 background tilemap 
-    //logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
     logic [6:0] tilemap [0:24][0:39];
     logic swtch;
 
@@ -271,12 +219,23 @@ module game_top(
         tilemap[21][7] = 77;
         tilemap[6][31] = 77;
         tilemap[5][32] = 77;
-
+        
+        //add game name
+        tilemap[2][4] = 29;
+        tilemap[2][5] = 79;
+        tilemap[2][6] = 48;
+        tilemap[2][7] = 45;
+        tilemap[2][8] = 47;
+        
+        tilemap[3][6] = 31;
+        tilemap[3][7] = 47;
+        tilemap[3][8] = 78;
+        tilemap[3][9] = 32;
     end
     
     always_ff @(posedge clk) begin
         integer i, j;
-        if (SW0) begin
+        if (SW[0]) begin
 
             for (i=29; i<=36; i=i+1)
             begin
@@ -457,7 +416,7 @@ module game_top(
             tilemap[7][27] <= 7'd19;
         end
         
-        if (SW1) begin
+        if (SW[1]) begin
 
             for (i=14; i<=21; i=i+1)
             begin
@@ -639,7 +598,7 @@ module game_top(
             
         end
         
-        if (SW2) begin
+        if (SW[2]) begin
  
             for (j=3; j<=12; j=j+1)
             begin
@@ -685,42 +644,42 @@ module game_top(
             tilemap[17][3] <= 7'd21;
             tilemap[18][1] <= 7'd10;
             tilemap[18][2] <= 7'd13;
-            tilemap[19][1] <= 7'd6;   
+            tilemap[19][1] <= 7'd6;    
             tilemap[19][2] <= 7'd17;      
             
             tilemap[13][10] <= 7'd20;
             tilemap[14][11] <= 7'd13;
             tilemap[14][12] <= 7'd16;
-            tilemap[15][11] <= 7'd9;   
+            tilemap[15][11] <= 7'd9;    
             tilemap[15][12] <= 7'd5; 
             
             tilemap[13][1] <= 7'd3;
             tilemap[13][2] <= 7'd7;
             tilemap[14][1] <= 7'd14;
-            tilemap[14][2] <= 7'd13;   
+            tilemap[14][2] <= 7'd13;    
             tilemap[15][3] <= 7'd18; 
             
             tilemap[9][11] <= 7'd15;
             tilemap[9][12] <= 7'd4;
             tilemap[10][11] <= 7'd13;
-            tilemap[10][12] <= 7'd8;   
+            tilemap[10][12] <= 7'd8;    
             tilemap[11][10] <= 7'd19; 
             
             tilemap[10][1] <= 7'd10;
             tilemap[10][2] <= 7'd13;
             tilemap[11][1] <= 7'd6;
-            tilemap[11][2] <= 7'd17;   
+            tilemap[11][2] <= 7'd17;    
             tilemap[9][3] <= 7'd21;
             
             tilemap[5][1] <= 7'd3;
             tilemap[5][2] <= 7'd7;
             tilemap[6][1] <= 7'd14;
-            tilemap[6][2] <= 7'd13;   
+            tilemap[6][2] <= 7'd13;    
             tilemap[7][3] <= 7'd18; 
             
             // Remove garbage pixels
             for (i=0; i<=24; i=i+1)
-            begin                                                                                                                 
+            begin                                                                                                                                                                   
                 tilemap[i][0] <= 7'd0;
             end
 
@@ -764,37 +723,37 @@ module game_top(
             tilemap[17][3] <= 7'd0;
             tilemap[18][1] <= 7'd0;
             tilemap[18][2] <= 7'd0;
-            tilemap[19][1] <= 7'd0;   
+            tilemap[19][1] <= 7'd0;    
             tilemap[19][2] <= 7'd0;      
             
             tilemap[13][10] <= 7'd0;
             tilemap[14][11] <= 7'd0;
             tilemap[14][12] <= 7'd0;
-            tilemap[15][11] <= 7'd0;   
+            tilemap[15][11] <= 7'd0;    
             tilemap[15][12] <= 7'd0; 
             
             tilemap[13][1] <= 7'd0;
             tilemap[13][2] <= 7'd0;
             tilemap[14][1] <= 7'd0;
-            tilemap[14][2] <= 7'd0;   
+            tilemap[14][2] <= 7'd0;    
             tilemap[15][3] <= 7'd0; 
             
             tilemap[9][11] <= 7'd0;
             tilemap[9][12] <= 7'd0;
             tilemap[10][11] <= 7'd0;
-            tilemap[10][12] <= 7'd0;   
+            tilemap[10][12] <= 7'd0;    
             tilemap[11][10] <= 7'd0; 
             
             tilemap[10][1] <= 7'd0;
             tilemap[10][2] <= 7'd0;
             tilemap[11][1] <= 7'd0;
-            tilemap[11][2] <= 7'd0;   
+            tilemap[11][2] <= 7'd0;    
             tilemap[9][3] <= 7'd0;
             
             tilemap[5][1] <= 7'd0;
             tilemap[5][2] <= 7'd0;
             tilemap[6][1] <= 7'd0;
-            tilemap[6][2] <= 7'd0;   
+            tilemap[6][2] <= 7'd0;    
             tilemap[7][3] <= 7'd0;
             
             for (i=7; i<=17; i=i+1)
@@ -807,23 +766,23 @@ module game_top(
             tilemap[17][10] <= 7'd11;
             tilemap[17][11] <= 7'd13;
             tilemap[17][12] <= 7'd21;
-            tilemap[18][10] <= 7'd10;   
+            tilemap[18][10] <= 7'd10;    
             tilemap[18][11] <= 7'd13;
             tilemap[18][12] <= 7'd13;
             tilemap[19][10] <= 7'd6;
-            tilemap[19][11] <= 7'd17;   
+            tilemap[19][11] <= 7'd17;    
             tilemap[19][12] <= 7'd2; 
             
             tilemap[5][10] <= 7'd3;
             tilemap[5][11] <= 7'd7;
             tilemap[5][12] <= 7'd1;
-            tilemap[6][10] <= 7'd14;   
+            tilemap[6][10] <= 7'd14;    
             tilemap[6][11] <= 7'd13;
             tilemap[6][12] <= 7'd13;
             tilemap[7][10] <= 7'd11;
-            tilemap[7][11] <= 7'd13;   
+            tilemap[7][11] <= 7'd13;    
             tilemap[7][12] <= 7'd18;
-             
+              
         end
     end
     
@@ -837,21 +796,27 @@ module game_top(
             sw1_prev <= 1'b0;
             sw2_prev <= 1'b0;
         end else begin
-            sw0_prev <= SW0;
-            sw1_prev <= SW1;
-            sw2_prev <= SW2;
+            sw0_prev <= SW[0];
+            sw1_prev <= SW[1];
+            sw2_prev <= SW[2];
         end
     end
     
-    assign sw_change = (SW0 ^ sw0_prev) | (SW1 ^ sw1_prev) | (SW2 ^ sw2_prev);
+    assign sw_change = (SW[0] ^ sw0_prev) | (SW[1] ^ sw1_prev) | (SW[2] ^ sw2_prev);
 
     logic sw_toggle;
 
     always_ff @(posedge clk or negedge rst) begin
         if (!rst)
             sw_toggle <= 1'b0;
-        else if (sw_change)   // your existing edge detector
+        else if (sw_change) begin  // your existing edge detector
             sw_toggle <= ~sw_toggle;
+            /*tilemap[24][23] <= 0;
+            tilemap[24][24] <= 0;
+            tilemap[24][25] <= 0;
+            tilemap[24][26] <= 0;
+            tilemap[24][27] <= 0;*/
+        end
     end
     
 
@@ -869,10 +834,10 @@ module game_top(
     
     // logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
     // drawcon blue_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
-    //                 .in_pos_y(y_pos+100), .in_width_y(100), .draw_y(curr_y),
-    //                 .bg_color({pix_wire_r_1, pix_wire_g_1, pix_wire_b_1}), 
-    //                 .in_pix_r(4'b0000), .in_pix_g(4'b0000), .in_pix_b(4'b1111),
-    //                 .o_pix_r(pix_wire_r_2), .o_pix_g(pix_wire_g_2), .o_pix_b(pix_wire_b_2));                
+    //                  .in_pos_y(y_pos+100), .in_width_y(100), .draw_y(curr_y),
+    //                  .bg_color({pix_wire_r_1, pix_wire_g_1, pix_wire_b_1}), 
+    //                  .in_pix_r(4'b0000), .in_pix_g(4'b0000), .in_pix_b(4'b1111),
+    //                  .o_pix_r(pix_wire_r_2), .o_pix_g(pix_wire_g_2), .o_pix_b(pix_wire_b_2));                
         
     logic [10:0] x_pos;
     logic [9:0] y_pos;
@@ -880,7 +845,7 @@ module game_top(
 
     assign accel_flag = in_space_key || in_center;
     
-    moving_car_states green_car(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .swtch(sw_toggle), .accel_flag(accel_flag), .bg_color({pix_wire_r_2, pix_wire_g_2, pix_wire_b_2}), .in_up(in_up), .in_down(in_down), .in_left(in_left), .in_right(in_right), .tilemap(tilemap), .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1), .y_pos(y_pos), .x_pos(x_pos));
+    moving_car_states green_car(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .swtch(sw_toggle), .clr_swtch(SW[14]), .accel_flag(accel_flag), .bg_color({pix_wire_r_2, pix_wire_g_2, pix_wire_b_2}), .in_up(in_up), .in_down(in_down), .in_left(in_left), .in_right(in_right), .tilemap(tilemap), .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1), .y_pos(y_pos), .x_pos(x_pos));
     
     
     // Calculate score
@@ -976,7 +941,8 @@ module game_top(
                 tilemap[12][24] <= 35 + tens_final;  
             end    
             tilemap[12][25] <= 35 + ones_final;     
-            tilemap[12][26] <= 34;   // 'S'   
+            tilemap[12][26] <= 34;   // 'S'    
+            
             
             if (prev_thousands==0 && prev_hundreds==0 && prev_tens==0) begin
                 tilemap[24][23] <= 0;
@@ -1030,66 +996,128 @@ module game_top(
     vga_out vga (.clk(pixclk), .pix_in_r(pix_wire_r_1), .pix_in_g(pix_wire_g_1), .pix_in_b(pix_wire_b_1),.pix_r(pix_r), .pix_g(pix_g), .pix_b(pix_b), .hsync(hsync), .vsync(vsync), .curr_x(curr_x), .curr_y(curr_y));
 
 
-    parameter ROM_DEPTH = 39526; 
-    parameter FIFO_WIDTH = 32;
-
+    localparam ROM_DEPTH = 39526;
+    localparam Win_sound_ROM_DEPTH = 8748;
+    localparam FIFO_WIDTH = 32;
+    
     // --- Signals ---
     logic [FIFO_WIDTH-1:0] current_audio_data;
     logic audio_req; 
     
     // --- Clock Divider ---
-    // We need to match an 8kHz Sample Rate.
-    // PWM Resolution = 8 bits = 256 steps.
-    // Required Audio Clock = 8000 Hz * 256 = 2.048 MHz.
-    //
-    // System Clock = 100 MHz.
-    // Divisor = 100 MHz / 2.048 MHz = ~48.8.
-    // We choose a Divisor of 50 for a clean 2 MHz clock.
-    // Actual Sample Rate = 2 MHz / 256 = 7812.5 Hz (Close enough to 8kHz).
-    //
-    // Toggle Logic: Divide by 50 means toggle every 25 ticks.
-    // Counter counts 0 to 24 (25 cycles).
-    logic [5:0] clk_cnt = 0;
-    logic audio_clk = 0;
-
-    always_ff @(posedge clk) begin
-        if (clk_cnt == 24) begin // Count 0 to 24 (25 cycles)
-            clk_cnt <= 0;
-            audio_clk <= ~audio_clk; // Toggle (Period = 50 cycles)
-        end else begin
-            clk_cnt <= clk_cnt + 1;
-        end
-    end
+    // Remove old clk_cnt, audio_clk logic since we are moving to system clock.
+    // We retain this only if the driver needs an enable pulse, but we will use sample_tick.
 
     // --- STATIC ARRAY (Block RAM) ---
     // (* rom_style = "block" *) forces Vivado to use BRAM instead of LUTs.
     (* rom_style = "block" *)
     logic [FIFO_WIDTH-1:0] music_storage [0:ROM_DEPTH-1];
+    (* rom_style = "block" *)
+    logic [FIFO_WIDTH-1:0] win_sound_storage [0:Win_sound_ROM_DEPTH-1];
     
-    // --- Loop Control Logic ---
-    logic [$clog2(ROM_DEPTH)-1:0] play_ptr = 0;
-
+    // --- Audio Control Logic ---
+    logic [15:0] music_ptr = 0;
+    logic [15:0] win_ptr = 0;
+    logic win_active = 0;
+    
     // Initialize Memory from file
     initial begin
         $readmemh("music_data.mem", music_storage);
+        $readmemh("win_sound.mem", win_sound_storage);
     end
 
-    // Playback Logic (Driven by the SLOW audio_clk)
-    always_ff @(posedge audio_clk) begin
+    // Audio Output Logic (Mixer)
+    logic [FIFO_WIDTH-1:0] music_sample_reg;
+    logic [FIFO_WIDTH-1:0] win_sample_reg;
+    
+    // --- Audio Trigger Cross-Domain Crossing ---
+    // Fast Domain Trigger Latch
+    reg win_sound_req_toggle = 0;
+    reg sw15_r = 0, sw15_rr = 0; // Debounce/Edge
+    
+    always_ff @(posedge clk) begin
+        // Edge detect SW[15] in fast domain
+        sw15_r <= SW[15];
+        sw15_rr <= sw15_r; 
+        
+        // Trigger on Crossed Line OR SW[15] Rising Edge
+        if (crossed_line || (sw15_r && !sw15_rr))
+            win_sound_req_toggle <= ~win_sound_req_toggle; // Toggle to signal event
+    end
+
+    // Slow Domain Edge Detect
+    reg win_sound_req_sync = 0;
+    reg win_sound_req_prev = 0;
+    
+    // --- Sample Rate Generator (8kHz) ---
+    // System Clock (100MHz) / 8000Hz = 12500 ticks
+    logic [13:0] sample_cnt = 0;
+    logic sample_tick;
+    
+    always_ff @(posedge clk) begin
+        if (sample_cnt == 12499) begin
+            sample_cnt <= 0;
+            sample_tick <= 1'b1;
+        end else begin
+            sample_cnt <= sample_cnt + 1;
+            sample_tick <= 1'b0;
+        end
+    end
+
+    // Playback Logic (Driven by System Clock, Gated by sample_tick)
+    always_ff @(posedge clk) begin
         if (~rst) begin
-            play_ptr <= 0;
-            current_audio_data <= 0;
-        end else if (audio_req) begin
-            // Fetch data
-            current_audio_data <= music_storage[play_ptr];
+            music_ptr <= 0;
+            win_ptr <= 0;
+            win_active <= 0;
+            music_sample_reg <= 8'd128; // Default Silence
+            win_sample_reg <= 8'd128;   // Default Silence
+            win_sound_req_sync <= 0;
+            win_sound_req_prev <= 0;
+        end else begin
+            // 1. Trigger Check (can happen anytime)
+            win_sound_req_sync <= win_sound_req_toggle;
+            win_sound_req_prev <= win_sound_req_sync;
             
-            // Increment or Loop
-            if (play_ptr == ROM_DEPTH - 1) begin
-                play_ptr <= 0; 
-            end else begin
-                play_ptr <= play_ptr + 1;
+            if (win_sound_req_sync != win_sound_req_prev) begin
+                win_active <= 1'b1;
+                win_ptr <= 0;
+            end
+
+            // 2. Playback Update (Only at 8kHz)
+            if (sample_tick) begin
+                // Update Music Pointer
+                music_sample_reg <= music_storage[music_ptr];
+                if (music_ptr == ROM_DEPTH - 1) 
+                    music_ptr <= 0; 
+                else 
+                    music_ptr <= music_ptr + 1;
+
+                // Update Win Sound Pointer
+                if (win_active) begin
+                    win_sample_reg <= win_sound_storage[win_ptr];
+                    if (win_ptr == Win_sound_ROM_DEPTH - 1) begin
+                        win_active <= 1'b0; // Stop
+                        win_ptr <= 0;
+                    end else begin
+                        win_ptr <= win_ptr + 1;
+                    end
+                end else begin
+                    win_sample_reg <= 8'd128; // Silence
+                end
             end
         end
+    end
+
+    // --- Audio Mixer (Combinatorial) ---
+    // Average Mixing: (A + B) / 2
+    logic [8:0] mixed_sample; 
+    
+    always_comb begin
+        // Average Mixing prevents overflow and clipping (whistle sound)
+        mixed_sample = (music_sample_reg[7:0] + win_sample_reg[7:0]) >> 1;
+        
+        current_audio_data = {24'd0, mixed_sample[7:0]};
     end
 
     // The driver is never empty
@@ -1097,11 +1125,13 @@ module game_top(
     assign fifo_always_has_data = 1'b0; 
 
     // --- Audio Driver Instance ---
+    // FIXED: Clocked at 100MHz (clk) instead of 2MHz.
+    //        This pushes PWM carrier to ~390kHz (ultrasonic), removing the whistle.
     fifo2audpwm #(
         .DATA_WIDTH(8),
         .FIFO_DATA_WIDTH(FIFO_WIDTH)
     ) u_audio_driver (
-        .clk(audio_clk),       // IMPORTANT: Use the slow audio_clk
+        .clk(clk),       // Use System Clock (100MHz)
         .aud_pwm(aud_pwm),
         .aud_en(aud_sd),       
         .fifo_rd_data(current_audio_data),

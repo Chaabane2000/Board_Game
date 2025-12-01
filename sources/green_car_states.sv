@@ -25,13 +25,14 @@ module moving_car_states#(
     input logic in_up, in_down, in_left, in_right,
     input logic [6:0] tilemap [0:24][0:39],
     input logic swtch,
+    input logic clr_swtch, 
     input logic accel_flag,
 
     output logic [3:0]   o_pix_r,
     output logic [3:0]   o_pix_g,
     output logic [3:0]   o_pix_b,
-    output logic [9:0]   y_pos = 192,
-    output logic [10:0]  x_pos = 576
+    output logic [9:0]   y_pos = 207,
+    output logic [10:0]  x_pos = 602
 );
  
     typedef enum logic [2:0] { 
@@ -97,7 +98,7 @@ module moving_car_states#(
     assign center_y = y_pos + {4'd0, IMG_HEIGHT[5:1]};
 
     //logic rot_h, rot_v, rot_d;
-    logic rot1, rot2, rot3, rot4, rot5, rot6, rot7, rot8, rot;
+    // logic rot1, rot2, rot3, rot4, rot5, rot6, rot7, rot8, rot;
 
     // --- Rotation Probes ---
     //collision_mask u1(.curr_x(center_x), .curr_y(center_y), .tilemap(tilemap), .walkable(rot_h));
@@ -111,10 +112,39 @@ module moving_car_states#(
     // collision_mask u6 (.curr_x(x_pos), .curr_y(y_pos+ (IMG_WIDTH >> 1)), .tilemap(tilemap), .walkable(rot6));
     // collision_mask u7 (.curr_x(x_pos- (IMG_HEIGHT >> 1) + 3), .curr_y(y_pos+ (IMG_WIDTH >> 1) - 3), .tilemap(tilemap), .walkable(rot7));
     // collision_mask u8 (.curr_x(x_pos- (IMG_HEIGHT >> 1)), .curr_y(y_pos), .tilemap(tilemap), .walkable(rot8));
-    collision_mask c1 (.curr_x(x_pos - 26), .curr_y(y_pos - 26), .tilemap(tilemap), .walkable(rot1));
-    collision_mask c2 (.curr_x(x_pos - 26), .curr_y(y_pos + 26), .tilemap(tilemap), .walkable(rot2));
-    collision_mask c3 (.curr_x(x_pos + 26), .curr_y(y_pos - 26), .tilemap(tilemap), .walkable(rot3));
-    collision_mask c4 (.curr_x(x_pos + 26), .curr_y(y_pos + 26), .tilemap(tilemap), .walkable(rot4));
+    
+    //rotatable to horisantale (up, down)
+    logic rot1_h, rot2_h, rot3_h, rot4_h;
+    collision_mask c1_h (.curr_x(x_pos - 26), .curr_y(y_pos - 15), .tilemap(tilemap), .walkable(rot1_h));
+    collision_mask c2_h (.curr_x(x_pos - 26), .curr_y(y_pos + 15), .tilemap(tilemap), .walkable(rot2_h));
+    collision_mask c3_h (.curr_x(x_pos + 26), .curr_y(y_pos - 15), .tilemap(tilemap), .walkable(rot3_h));
+    collision_mask c4_h (.curr_x(x_pos + 26), .curr_y(y_pos + 15), .tilemap(tilemap), .walkable(rot4_h));
+    assign rotatable_h = rot1_h & rot2_h & rot3_h & rot4_h;
+
+    //rotatable to vertical (left, right)
+    logic rot1_v, rot2_v, rot3_v, rot4_v;
+    collision_mask c1_v (.curr_x(x_pos - 15), .curr_y(y_pos - 26), .tilemap(tilemap), .walkable(rot1_v));
+    collision_mask c2_v (.curr_x(x_pos - 15), .curr_y(y_pos + 26), .tilemap(tilemap), .walkable(rot2_v));
+    collision_mask c3_v (.curr_x(x_pos + 15), .curr_y(y_pos - 26), .tilemap(tilemap), .walkable(rot3_v));
+    collision_mask c4_v (.curr_x(x_pos + 15), .curr_y(y_pos + 26), .tilemap(tilemap), .walkable(rot4_v));
+    assign rotatable_v = rot1_v & rot2_v & rot3_v & rot4_v;
+
+    //rotatable to diagonal ur, dl
+    logic rot1_d1, rot2_d1, rot3_d1, rot4_d1;
+    collision_mask c1_d1 (.curr_x(x_pos - 26), .curr_y(y_pos - 9), .tilemap(tilemap), .walkable(rot1_d1));
+    collision_mask c2_d1 (.curr_x(x_pos + 26), .curr_y(y_pos + 9), .tilemap(tilemap), .walkable(rot2_d1));
+    collision_mask c3_d1 (.curr_x(x_pos + 9), .curr_y(y_pos + 26), .tilemap(tilemap), .walkable(rot3_d1));
+    collision_mask c4_d1 (.curr_x(x_pos - 9), .curr_y(y_pos - 26), .tilemap(tilemap), .walkable(rot4_d1));
+    assign rotatable_d1 = rot1_d1 & rot2_d1 & rot3_d1 & rot4_d1;
+
+    //rotatable to diagonal ul, dr
+    logic rot1_d2, rot2_d2, rot3_d2, rot4_d2;
+    collision_mask c1_d2 (.curr_x(x_pos + 26), .curr_y(y_pos - 9), .tilemap(tilemap), .walkable(rot1_d2));
+    collision_mask c2_d2 (.curr_x(x_pos - 26), .curr_y(y_pos + 9), .tilemap(tilemap), .walkable(rot2_d2));
+    collision_mask c3_d2 (.curr_x(x_pos - 9), .curr_y(y_pos + 26), .tilemap(tilemap), .walkable(rot3_d2));
+    collision_mask c4_d2 (.curr_x(x_pos + 9), .curr_y(y_pos - 26), .tilemap(tilemap), .walkable(rot4_d2));
+    assign rotatable_d2 = rot1_d2 & rot2_d2 & rot3_d2 & rot4_d2;
+
     
     state_car curr_state, next_state;
 
@@ -139,7 +169,7 @@ module moving_car_states#(
     end
     
     assign walkable = walkable1 & walkable2 & walkable3 & walkable4;
-    assign rotatable = rot1 & rot2 & rot3 & rot4;
+    
 
     always_comb begin
         next_state = curr_state;
@@ -160,19 +190,19 @@ module moving_car_states#(
                 x_p3 = next_x - 24; y_p3 = next_y + 13;
                 x_p4 = next_x + 24; y_p4 = next_y + 13;
                 //if(in_down&~in_up&~in_left&~in_right && rot_v && ~stuck)begin
-                if(in_down&~in_up&~in_left&~in_right && rotatable && ~stuck)begin
+                if(in_down&~in_up&~in_left&~in_right && rotatable_v && ~stuck)begin
                     next_state = right_st;
                 end
                 //else if(in_up&~in_down&~in_left&~in_right && rot_v && ~stuck)begin
-                else if(in_up&~in_down&~in_left&~in_right && rotatable && ~stuck)begin
+                else if(in_up&~in_down&~in_left&~in_right && rotatable_v && ~stuck)begin
                     next_state = left_st;
                 end
                 //else if(~in_up&in_down&~in_left&in_right && rot_d && ~stuck)begin
-                else if(~in_up&in_down&~in_left&in_right && rotatable && ~stuck)begin
+                else if(~in_up&in_down&~in_left&in_right && rotatable_d1 && ~stuck)begin
                     next_state = diagonal_ru_s;
                 end
                 //else if(in_up&~in_down&~in_left&in_right && rot_d && ~stuck)begin
-                else if(in_up&~in_down&~in_left&in_right && rotatable && ~stuck)begin
+                else if(in_up&~in_down&~in_left&in_right && rotatable_d2 && ~stuck)begin
                     next_state = diagonal_lu_s;
                 end
 
@@ -187,19 +217,19 @@ module moving_car_states#(
                 x_p4 = next_x + 24; y_p4 = next_y + 13;
                
                 //if(in_down&~in_up&~in_left&~in_right && rot_v && ~stuck)begin
-                if(in_down&~in_up&~in_left&~in_right && rotatable && ~stuck)begin
+                if(in_down&~in_up&~in_left&~in_right && rotatable_v && ~stuck)begin
                     next_state = right_st;
                 end
                 //else if(in_up&~in_down&~in_left&~in_right && rot_v && ~stuck)begin
-                else if(in_up&~in_down&~in_left&~in_right && rotatable && ~stuck)begin
+                else if(in_up&~in_down&~in_left&~in_right && rotatable_v && ~stuck)begin
                     next_state = left_st;
                 end
                 //else if(~in_up&in_down&in_left&~in_right && rot_d && ~stuck)begin
-                else if(~in_up&in_down&in_left&~in_right && rotatable && ~stuck)begin
+                else if(~in_up&in_down&in_left&~in_right && rotatable_d2 && ~stuck)begin
                     next_state = diagonal_rd_s;
                 end
                 //else if(in_up&~in_down&in_left&~in_right && rot_d && ~stuck)begin
-                else if(in_up&~in_down&in_left&~in_right && rotatable && ~stuck)begin
+                else if(in_up&~in_down&in_left&~in_right && rotatable_d1 && ~stuck)begin
                     next_state = diagonal_ld_s;
                 end
             end
@@ -208,24 +238,24 @@ module moving_car_states#(
                 IMG_WIDTH = IMG_WIDTH_V;
                 bram_data = bram_data_l;
                 x_p1 = next_x - 13; y_p1 = next_y - 24;
-                x_p2 = next_x - 13; y_p2 = next_y + 24;
+                x_p2 = next_x - 13; y_p2 = next_y + 22;
                 x_p3 = next_x + 13; y_p3 = next_y - 24;
-                x_p4 = next_x + 13; y_p4 = next_y + 24;
+                x_p4 = next_x + 13; y_p4 = next_y + 22;
 
                 //if(in_right&~in_left&~in_up&~in_down && rot_h && ~stuck)begin
-                if(in_right&~in_left&~in_up&~in_down && rotatable && ~stuck)begin
+                if(in_right&~in_left&~in_up&~in_down && rotatable_h && ~stuck)begin
                     next_state = up_st;
                 end
                 //else if(in_left&~in_right&~in_up&~in_down && rot_h && ~stuck)begin
-                else if(in_left&~in_right&~in_up&~in_down && rotatable && ~stuck)begin
+                else if(in_left&~in_right&~in_up&~in_down && rotatable_h && ~stuck)begin
                     next_state = down_st;
                 end
                 //else if(~in_left&in_right&in_up&~in_down && rot_d && ~stuck)begin
-                else if(~in_left&in_right&in_up&~in_down && rotatable && ~stuck)begin
+                else if(~in_left&in_right&in_up&~in_down && rotatable_d2 && ~stuck)begin
                     next_state = diagonal_lu_s;
                 end
                 //else if(in_left&~in_right&in_up&~in_down && rot_d && ~stuck)begin
-                else if(in_left&~in_right&in_up&~in_down && rotatable && ~stuck)begin
+                else if(in_left&~in_right&in_up&~in_down && rotatable_d1 && ~stuck)begin
                     next_state = diagonal_ld_s;
                 end
             end
@@ -234,23 +264,23 @@ module moving_car_states#(
                 IMG_WIDTH = IMG_WIDTH_V;
                 bram_data = bram_data_r;
                 x_p1 = next_x - 13; y_p1 = next_y - 24;
-                x_p2 = next_x - 13; y_p2 = next_y + 24;
+                x_p2 = next_x - 13; y_p2 = next_y + 22;
                 x_p3 = next_x + 13; y_p3 = next_y - 24;
-                x_p4 = next_x + 13; y_p4 = next_y + 24;
+                x_p4 = next_x + 13; y_p4 = next_y + 22;
                 //if(in_right&~in_left&~in_up&~in_down && rot_h)begin
-                if(in_right&~in_left&~in_up&~in_down && rotatable)begin
+                if(in_right&~in_left&~in_up&~in_down && rotatable_h && ~stuck)begin
                     next_state = up_st;
                 end
                 //else if(in_left&~in_right&~in_up&~in_down && rot_h)begin
-                else if(in_left&~in_right&~in_up&~in_down && rotatable)begin
+                else if(in_left&~in_right&~in_up&~in_down && rotatable_h && ~stuck)begin
                     next_state = down_st;
                 end
                 //else if(~in_left&in_right&~in_up&in_down && rot_d)begin
-                else if(~in_left&in_right&~in_up&in_down && rotatable)begin
+                else if(~in_left&in_right&~in_up&in_down && rotatable_d1 && ~stuck)begin
                     next_state = diagonal_ru_s;
                 end
                 //else if(in_left&~in_right&~in_up&in_down && rot_d)begin
-                else if(in_left&~in_right&~in_up&in_down && rotatable)begin
+                else if(in_left&~in_right&~in_up&in_down && rotatable_d2 && ~stuck)begin
                     next_state = diagonal_rd_s;
                 end
             end
@@ -262,13 +292,13 @@ module moving_car_states#(
                 x_p1 = next_x - 24; y_p1 = next_y - 9;
                 x_p2 = next_x + 24; y_p2 = next_y + 9;
                 x_p1 = next_x - 9; y_p1 = next_y - 24;
-                x_p2 = next_x + 9; y_p2 = next_y + 24;
+                x_p2 = next_x + 9; y_p2 = next_y + 22;
                 //if(~in_right&in_left&~in_up&~in_down && rot_h)begin
-                if(~in_right&in_left&~in_up&~in_down && rotatable)begin
+                if(~in_right&in_left&~in_up&~in_down && rotatable_h && ~stuck)begin
                     next_state = down_st;
                 end
                 //else if(~in_left&~in_right&in_up&~in_down && rot_v)begin
-                else if(~in_left&~in_right&in_up&~in_down && rotatable)begin
+                else if(~in_left&~in_right&in_up&~in_down && rotatable_v && ~stuck)begin
                     next_state = left_st;
                 end
                 end
@@ -278,43 +308,43 @@ module moving_car_states#(
                 bram_data = bram_data_lu;
                 x_p1 = next_x - 24; y_p1 = next_y + 9;
                 x_p2 = next_x + 24; y_p2 = next_y - 9;
-                x_p1 = next_x - 9; y_p1 = next_y + 24;
+                x_p1 = next_x - 9; y_p1 = next_y + 22;
                 x_p2 = next_x + 9; y_p2 = next_y - 24;
                 //if (in_right&~in_left&~in_up&~in_down && rot_h)
-                if (in_right&~in_left&~in_up&~in_down && rotatable)
+                if (in_right&~in_left&~in_up&~in_down && rotatable_h && ~stuck)
                     next_state = up_st;
                 //else if (~in_left&~in_right&in_up&~in_down && rot_v)
-                else if (~in_left&~in_right&in_up&~in_down && rotatable)
+                else if (~in_left&~in_right&in_up&~in_down && rotatable_v && ~stuck)
                     next_state = left_st;
                 end
             diagonal_rd_s:begin
                 IMG_HEIGHT = IMG_HEIGHT_D;
                 IMG_WIDTH = IMG_WIDTH_D;
                 bram_data = bram_data_rd;
-                x_p1 = next_x - 24; y_p1 = next_y - 9;
-                x_p2 = next_x + 24; y_p2 = next_y + 9;
-                x_p1 = next_x - 9; y_p1 = next_y - 24;
-                x_p2 = next_x + 9; y_p2 = next_y + 24;
+                x_p1 = next_x - 24; y_p1 = next_y + 9;
+                x_p2 = next_x + 24; y_p2 = next_y - 9;
+                x_p1 = next_x - 9; y_p1 = next_y + 22;
+                x_p2 = next_x + 9; y_p2 = next_y - 24;
                 //if (~in_right&~in_left&~in_up&in_down && rot_v)
-                if (~in_right&~in_left&~in_up&in_down && rotatable)
+                if (~in_right&~in_left&~in_up&in_down && rotatable_v && ~stuck)
                     next_state = right_st;
                 //else if (in_left&~in_right&~in_up&~in_down && rot_h)
-                else if (in_left&~in_right&~in_up&~in_down && rotatable)
+                else if (in_left&~in_right&~in_up&~in_down && rotatable_h && ~stuck)
                     next_state = down_st;
                 end
             diagonal_ru_s:begin
                 IMG_HEIGHT = IMG_HEIGHT_D;
                 IMG_WIDTH = IMG_WIDTH_D;
                 bram_data = bram_data_ru;
-                x_p1 = next_x - 24; y_p1 = next_y + 9;
-                x_p2 = next_x + 24; y_p2 = next_y - 9;
-                x_p1 = next_x - 9; y_p1 = next_y + 24;
-                x_p2 = next_x + 9; y_p2 = next_y - 24;
+                x_p1 = next_x - 24; y_p1 = next_y - 9;
+                x_p2 = next_x + 24; y_p2 = next_y + 9;
+                x_p1 = next_x + 9; y_p1 = next_y + 22;
+                x_p2 = next_x - 9; y_p2 = next_y - 24;
                 //if (in_right&~in_left&~in_up&~in_down && rot_h)
-                if (in_right&~in_left&~in_up&~in_down && rotatable)
+                if (in_right&~in_left&~in_up&~in_down && rotatable_h && ~stuck)
                     next_state = up_st;
                 //else if (~in_left&~in_right&~in_up&in_down && rot_v)
-                else if (~in_left&~in_right&~in_up&in_down && rotatable)
+                else if (~in_left&~in_right&~in_up&in_down && rotatable_v && ~stuck)
                     next_state = right_st;
                 end
             default:begin
@@ -403,8 +433,8 @@ module moving_car_states#(
         if (~rst || sw_change_pulse)
         begin
             div_counter <= 0;
-            x_pos <= 576;
-            y_pos <= 192;
+            x_pos <= 602;
+            y_pos <= 207;
             speed_counter <= slow_countervalue;
             stuck <= 0;
             stuck_counter <= 0;
@@ -448,7 +478,7 @@ module moving_car_states#(
                     
                     if (is_moving && ~walkable && stuck == 0) begin
                         stuck <= 1;
-                        stuck_counter <= 500;
+                        stuck_counter <= 200;
                     end else begin
                         //move up
                         if((up_trigger||in_up) && walkable && signed'(y_pos - step) > 0)
@@ -588,9 +618,16 @@ module moving_car_states#(
     logic [8:0] r_mixed, g_mixed, b_mixed;
     
     always_comb begin
+    if (!clr_swtch) begin
         r_mixed = (fg_r * alpha_eff) + (bg_r * inv_alpha);
         g_mixed = (fg_g * alpha_eff) + (bg_g * inv_alpha);
         b_mixed = (fg_b * alpha_eff) + (bg_b * inv_alpha);
+    end 
+    else begin
+        r_mixed = (fg_g * alpha_eff) + (bg_r * inv_alpha);
+        g_mixed = (fg_r * alpha_eff) + (bg_g * inv_alpha);
+        b_mixed = (fg_b * alpha_eff) + (bg_b * inv_alpha);
+    end
     end
 
     // 5. Output Register (Divide by 16 via shift)
