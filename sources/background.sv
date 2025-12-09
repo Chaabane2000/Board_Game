@@ -1,38 +1,46 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Module Name: background
-// Description: Tile-based background renderer with Alpha Blending.
-//              - Supports 16-bit ARGB4444 textures.
-//              - Blends Sprites (Trees/Rocks) over the Grass base layer.
-//              - FIXED: Forces Roads/Grass to be Opaque (ignore BRAM alpha).
-//              - FIXED: Allows Trees/Rocks to Blend (use BRAM alpha).
+// Description: This module is a tile-based background renderer that draws the game
+//              world. It reads a tilemap and renders the corresponding 32x32 tile
+//              for each location on the screen. It features a two-layer rendering
+//              system with alpha blending, where sprite-like tiles (e.g., trees,
+//              rocks) are blended on top of a base grass layer.
 //////////////////////////////////////////////////////////////////////////////////
 
 module background #(
-    parameter TILE_WIDTH  = 32,
-    parameter TILE_HEIGHT = 32,
-    parameter ADDR_TILES_WIDTH_SIZE = 5, 
-    parameter ADDR_TILES_HEIGHT_SIZE = 5,
-    parameter NUM_TILES_X = 40,
-    parameter NUM_TILES_Y = 25,
-    parameter ADDR_TILES_X_SIZE = 6, 
-    parameter ADDR_TILES_Y_SIZE = 5, 
-    parameter COLOR_WIDTH = 16,     // 16 bits for ARGB4444
-    parameter TILE_IDX_WIDTH = 7,
-    parameter ADDR_WIDTH = 10 
+    // Tile and Coordinate Parameters
+    parameter TILE_WIDTH               = 32,    // Width of a single tile in pixels
+    parameter TILE_HEIGHT              = 32,    // Height of a single tile in pixels
+    parameter ADDR_TILES_WIDTH_SIZE    = 5,     // Bit width for x-coordinate within a tile (2^5 = 32)
+    parameter ADDR_TILES_HEIGHT_SIZE   = 5,     // Bit width for y-coordinate within a tile (2^5 = 32)
+    parameter NUM_TILES_X              = 40,    // Number of tiles horizontally in the tilemap
+    parameter NUM_TILES_Y              = 25,    // Number of tiles vertically in the tilemap
+    parameter ADDR_TILES_X_SIZE        = 6,     // Bit width for tilemap x-index (2^6 > 40)
+    parameter ADDR_TILES_Y_SIZE        = 5,     // Bit width for tilemap y-index (2^5 > 25)
+
+    // Data Width Parameters
+    parameter COLOR_WIDTH              = 16,    // Pixel color data width: ARGB4444 (16 bits)
+    parameter TILE_IDX_WIDTH           = 7,     // Bit width for the tile ID from the tilemap
+    parameter ADDR_WIDTH               = 10     // BRAM address width for a single tile (32*32 = 1024 = 2^10)
 )(
-    input  logic                         clk,
-    input  logic                         rst,
-    input  logic [10:0]                  curr_x, 
-    input  logic [9:0]                   curr_y,  
-    input  logic [TILE_IDX_WIDTH-1:0]    tilemap [0:NUM_TILES_Y-1][0:NUM_TILES_X-1],
-    input  logic [COLOR_WIDTH-1:0]       bg_color, // Expecting 12-bit RGB or 16-bit ARGB
-    output logic [3:0]                   o_pix_r,
-    output logic [3:0]                   o_pix_g,
-    output logic [3:0]                   o_pix_b
+    // System and VGA Inputs
+    input  logic                         clk,       // System clock
+    input  logic                         rst,       // System reset
+    input  logic [10:0]                  curr_x,    // Current VGA horizontal pixel coordinate
+    input  logic [9:0]                   curr_y,    // Current VGA vertical pixel coordinate
+    input  logic [TILE_IDX_WIDTH-1:0]    tilemap [0:NUM_TILES_Y-1][0:NUM_TILES_X-1], // Game world tilemap
+    input  logic [COLOR_WIDTH-1:0]       bg_color,  // Default background color (not used, grass is base)
+
+    // VGA Outputs
+    output logic [3:0]                   o_pix_r,   // Final red pixel component
+    output logic [3:0]                   o_pix_g,   // Final green pixel component
+    output logic [3:0]                   o_pix_b    // Final blue pixel component
 );
 
-    // --- Coordinate Calculation (Unchanged) ---
+    //==============================================================================
+    // Coordinate and Address Calculation
+    //==============================================================================
     logic [ADDR_TILES_X_SIZE-1:0] tile_x;
     logic [ADDR_TILES_Y_SIZE-1:0] tile_y;
     logic [ADDR_TILES_WIDTH_SIZE-1:0] x_in_tile;
@@ -44,15 +52,18 @@ module background #(
     assign y_in_tile = curr_y[4:0];  
 
     logic [TILE_IDX_WIDTH-1:0] tile_id;
-    assign tile_id = tilemap[tile_y][tile_x];
+    assign tile_id = tilemap[tile_y][tile_x]; // Get the ID of the tile at the current screen position.
 
+    // --- BRAM Address Calculation for Base and Rotated Tiles ---
     logic [ADDR_WIDTH-1:0] addr, addr_90, addr_180, addr_270;
-    assign addr = (y_in_tile << 5) + x_in_tile;
-    assign addr_90  = ((TILE_WIDTH - 1 - x_in_tile) << 5) + y_in_tile;
-    assign addr_180 = ((TILE_HEIGHT - 1 - y_in_tile) << 5) + (TILE_WIDTH - 1 - x_in_tile);
-    assign addr_270 = (x_in_tile << 5) + (TILE_HEIGHT - 1 - y_in_tile);
+    assign addr     = (y_in_tile << ADDR_TILES_WIDTH_SIZE) + x_in_tile;                      // Normal
+    assign addr_90  = ((TILE_WIDTH - 1 - x_in_tile) << ADDR_TILES_WIDTH_SIZE) + y_in_tile;  // Rotated 90 degrees clockwise
+    assign addr_180 = ((TILE_HEIGHT - 1 - y_in_tile) << ADDR_TILES_WIDTH_SIZE) + (TILE_WIDTH - 1 - x_in_tile); // Rotated 180 degrees
+    assign addr_270 = (x_in_tile << ADDR_TILES_WIDTH_SIZE) + (TILE_HEIGHT - 1 - y_in_tile); // Rotated 270 degrees clockwise
 
-    // --- PIPELINE STAGE 1: Address & Control ---
+    //==============================================================================
+    // Pipeline Stage 1: Address and Control Signal Registration
+    //==============================================================================
     logic [ADDR_WIDTH-1:0] addr_reg, addr_90_reg, addr_180_reg, addr_270_reg;
     logic [TILE_IDX_WIDTH-1:0] tile_id_sr [0:4];
 
@@ -69,6 +80,7 @@ module background #(
             addr_180_reg <= addr_180;
             addr_270_reg <= addr_270;
 
+            // Shift register to delay tile_id to match BRAM read latency.
             tile_id_sr[0] <= tile_id;
             tile_id_sr[1] <= tile_id_sr[0];
             tile_id_sr[2] <= tile_id_sr[1];
@@ -77,7 +89,9 @@ module background #(
         end
     end
 
-    // --- BRAM Signals ---
+    //==============================================================================
+    // BRAM Interface and Instantiations
+    //==============================================================================
     logic [COLOR_WIDTH-1:0] bram_grass_data;
     logic [COLOR_WIDTH-1:0] bram_road_data1, bram_road_data1_180;
     logic [COLOR_WIDTH-1:0] bram_road_data2, bram_road_data2_90, bram_road_data2_180, bram_road_data2_270;
@@ -90,15 +104,17 @@ module background #(
     logic [COLOR_WIDTH-1:0] bram_road_data15, bram_road_data16, bram_road_data17, bram_road_data18;
     logic [COLOR_WIDTH-1:0] bram_road_data19, bram_road_data20, bram_road_data21, bram_road_data22;
     logic [COLOR_WIDTH-1:0] bram_road_start_data1, bram_road_start_data2, bram_road_start_data3, bram_road_position_data;
-    logic [COLOR_WIDTH-1:0] bram_letter_l, bram_letter_a, bram_letter_p, bram_letter_t, bram_letter_i, bram_letter_m, bram_letter_e;
+    logic [COLOR_WIDTH-1:0] bram_letter_d, bram_letter_u, bram_letter_l, bram_letter_a, bram_letter_p, bram_letter_t, bram_letter_i, bram_letter_m, bram_letter_e;
     logic [COLOR_WIDTH-1:0] bram_letter_two_points, bram_letter_s ,bram_letter_b, bram_letter_c, bram_letter_o, bram_letter_r;
     logic [COLOR_WIDTH-1:0] bram_number_0, bram_number_1, bram_number_2, bram_number_3, bram_number_4;
     logic [COLOR_WIDTH-1:0] bram_number_5, bram_number_6, bram_number_7, bram_number_8, bram_number_9;
     logic [COLOR_WIDTH-1:0] bram_tree1, bram_tree2, bram_tree3, bram_tree4;
     logic [COLOR_WIDTH-1:0] bram_tribune1, bram_tribune2, bram_tribune3, bram_tribune4, bram_tribune5, bram_tribune6, bram_tribune7, bram_tribune8;
     logic [COLOR_WIDTH-1:0] bram_rock1, bram_rock2, bram_rock3, bram_rock4, bram_rock5;
+    logic [COLOR_WIDTH-1:0] bram_letter_tw, bram_letter_uw, bram_letter_rw, bram_letter_bw, bram_letter_ow, bram_letter_mw, bram_letter_dw, bram_letter_ew;
+    logic [COLOR_WIDTH-1:0] bram_letter_tr, bram_letter_mr;
     
-    // --- BRAM Instantiations ---
+    // Instantiations of all tile texture memories.
     grass gr ( .clka(clk), .addra(addr_reg), .douta(bram_grass_data) );
     road1  r1  ( .clka(clk), .addra(addr_reg), .douta(bram_road_data1) );
     road1  r1_180  ( .clka(clk), .addra(addr_180_reg), .douta(bram_road_data1_180) );
@@ -177,15 +193,29 @@ module background #(
     rock3  rck3  ( .clka(clk), .addra(addr_reg), .douta(bram_rock3) );
     rock4  rck4  ( .clka(clk), .addra(addr_reg), .douta(bram_rock4) );
     rock5  rck5  ( .clka(clk), .addra(addr_reg), .douta(bram_rock5) );
+    D  letter_d  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_d) );
+    U  letter_u  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_u) );
+    T_white  letter_tw  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_tw) );
+    U_white  letter_uw  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_uw) );
+    R_white  letter_rw  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_rw) );
+    B_white  letter_bw  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_bw) );
+    O_white  letter_ow  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_ow) );
+    M_white  letter_mw  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_mw) );
+    D_white  letter_dw  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_dw) );
+    E_white  letter_ew  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_ew) );
+    T_red  letter_tr  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_tr) );
+    M_red  letter_mr  ( .clka(clk), .addra(addr_reg), .douta(bram_letter_mr) );
     
-    // --- FOREGROUND SELECTION LOGIC ---
-    // [1] accounts for: 1 cycle Addr Register + 1 cycle BRAM Latency (adjust to [2] if needed)
+    //==============================================================================
+    // Foreground Tile Selection (Multiplexer)
+    //==============================================================================
     logic [TILE_IDX_WIDTH-1:0] tile_sel;
-    assign tile_sel = tile_id_sr[1]; 
+    // The tile_id is delayed by 2 cycles to align with the BRAM data output,
+    // which has a 2-cycle latency (1 for address register, 1 for data output).
+    assign tile_sel = tile_id_sr[2]; 
 
     logic [COLOR_WIDTH-1:0] fg_pixel;
     
-    // Select the foreground sprite.
     always_comb begin
         case(tile_sel)
             7'd0: fg_pixel = bram_grass_data;
@@ -266,15 +296,29 @@ module background #(
             7'd75: fg_pixel = bram_rock3;
             7'd76: fg_pixel = bram_rock4;
             7'd77: fg_pixel = bram_rock5;
+            7'd78: fg_pixel = bram_letter_d;
+            7'd79: fg_pixel = bram_letter_u;
+            7'd80: fg_pixel = bram_letter_tw;
+            7'd81: fg_pixel = bram_letter_uw;
+            7'd82: fg_pixel = bram_letter_rw;
+            7'd83: fg_pixel = bram_letter_bw;
+            7'd84: fg_pixel = bram_letter_ow;
+            7'd85: fg_pixel = bram_letter_mw;
+            7'd86: fg_pixel = bram_letter_dw;
+            7'd87: fg_pixel = bram_letter_ew;
+            7'd88: fg_pixel = bram_letter_tr;
+            7'd89: fg_pixel = bram_letter_mr;
             default: fg_pixel = {4'hF, bg_color}; // Treat default bg as Opaque
         endcase
     end
 
-    // --- PIPELINE STAGE 2: Alpha Blending ---
+    //==============================================================================
+    // Pipeline Stage 2: Alpha Blending
+    //==============================================================================
     
     // Background Layer: Grass (since most sprites are overlayed on the field)
     logic [COLOR_WIDTH-1:0] bg_pixel_local;
-    assign bg_pixel_local = bram_grass_data;
+    assign bg_pixel_local = bram_grass_data; // All blending is done against the grass texture.
 
     // Components
     logic [3:0] fg_a_raw, fg_r, fg_g, fg_b;
@@ -284,21 +328,23 @@ module background #(
     assign {bg_r, bg_g, bg_b} = bg_pixel_local[11:0]; 
 
     // --- ALPHA CONTROL LOGIC ---
-    // User Request: Only Tree (61-64) and Rock (73-77) support alpha.
-    //               Grass (0) and Roads (1-25, 49-60) do not (Force Opaque).
-    //               (We treat Text/Tribunes as Alpha-capable to prevent artifacts).
+    // This logic determines if a tile should be treated as transparent or opaque.
+    // Tiles like trees and rocks use their texture's alpha channel.
+    // Most other tiles (roads, grass) are forced to be fully opaque to ensure they
+    // completely cover the base grass layer underneath them.
     logic is_opaque_tile;
     always_comb begin
-        if ((tile_sel >= 7'd50 && tile_sel <= 7'd60) || (tile_sel >= 7'd73 && tile_sel <= 7'd77) || (tile_sel >= 7'd61 && tile_sel <= 7'd64) || (tile_sel >= 7'd3 && tile_sel <= 7'd10))
-            is_opaque_tile = 1'b0; // Trees      
+        if ((tile_sel >= 7'd49 && tile_sel <= 7'd77) || (tile_sel >= 7'd3 && tile_sel <= 7'd10))
+            is_opaque_tile = 1'b0; // Allow alpha for diagonal roads, trees, tribunes, and rocks.
         else 
-            is_opaque_tile = 1'b1; // Text, Trees, Tribunes, Rocks
+            is_opaque_tile = 1'b1; // Force all other tiles to be opaque.
     end
 
     logic [3:0] fg_a;
+    // If the tile is opaque, force alpha to 15, unless the pixel is color 0 (transparent key).
+    // Otherwise, use the alpha value from the texture data.
     assign fg_a = (is_opaque_tile) ? ((fg_pixel == 0) ? 4'd0 : 4'd15) : fg_a_raw;
 
-    // Alpha Inverse
     logic [3:0] inv_alpha;
     assign inv_alpha = 4'd15 - fg_a;
 
@@ -310,20 +356,17 @@ module background #(
         b_mixed = (fg_b * fg_a) + (bg_b * inv_alpha);
     end
 
-    // Output Register
-    logic [COLOR_WIDTH-1:0] stage1, stage2;
+    // --- Output Register Stage ---
+    logic [COLOR_WIDTH-1:0] stage1;
 
     always_ff @(posedge clk) begin
         if (~rst) begin
             stage1 <= {4'hF, bg_color};
-            stage2 <= {4'hF, bg_color};
         end else begin
-            // Result is (Mix / 16)
             stage1[15:12] <= 4'hF; // Output is always opaque to VGA
             stage1[11:8]  <= r_mixed[7:4];
             stage1[7:4]   <= g_mixed[7:4];
             stage1[3:0]   <= b_mixed[7:4];
-            stage2 <= stage1;
         end
     end
 

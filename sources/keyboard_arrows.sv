@@ -1,72 +1,76 @@
 `timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Module Name: keyboard_arrows
+// Description: This module decodes raw PS/2 scancodes from a `ps2_receiver`
+//              and translates them into simple, persistent logic signals for the
+//              arrow keys (up, down, left, right) and the spacebar. It handles
+//              both key press and key release events to maintain the state of
+//              each key.
+//////////////////////////////////////////////////////////////////////////////////
 
 module keyboard_arrows (
-    input  logic clk,
-    input  logic reset,
-    input  logic ps2_clk,
-    input  logic ps2_data,
+    // System and PS/2 Inputs
+    input  logic clk,        // System clock
+    input  logic reset,      // System reset
+    input  logic ps2_clk,    // PS/2 interface clock
+    input  logic ps2_data,   // PS/2 interface data
 
-    output logic up,
-    output logic down,
-    output logic left,
-    output logic right
+    // Key State Outputs
+    output logic up,         // High when the 'Up Arrow' key is held down
+    output logic down,       // High when the 'Down Arrow' key is held down
+    output logic left,       // High when the 'Left Arrow' key is held down
+    output logic right,      // High when the 'Right Arrow' key is held down
+    output logic space       // High when the 'Spacebar' key is held down
 );
 
-    // Get the raw PS/2 bytes
-    logic byte_ready;
+    // Instantiate the PS/2 receiver to get raw scancodes.
     logic [7:0] code;
+    logic release_flag;
 
     ps2_receiver ps2 (
         .clk(clk),
         .reset(reset),
         .ps2_clk(ps2_clk),
         .ps2_data(ps2_data),
-        .byte_ready(byte_ready),
-        .byte_out(code)
+        .byte_out(code),
+        .release_flag(release_flag)
     );
 
-    // constants
-    localparam BREAK = 8'hF0;
+    // PS/2 Set 2 scancodes for make (press) events.
     localparam UP    = 8'h75;
     localparam DOWN  = 8'h72;
     localparam LEFT  = 8'h6B;
     localparam RIGHT = 8'h74;
+    localparam SPACE = 8'h29;
 
-    logic break_next;
-
-    always_ff @(posedge clk or posedge reset) begin
+    // This block holds the state of each key. It sets the corresponding output flag
+    // to high on a key press and low on a key release.
+    always_ff @(posedge clk) begin
         if (reset) begin
             up <= 1'b0;
             down <= 1'b0;
             left <= 1'b0;
             right <= 1'b0;
-            break_next <= 1'b0;
+            space <= 1'b0;
         end else begin
-            // Default to de-asserting the pulse signals
-            up <= 1'b0;
-            down <= 1'b0;
-            left <= 1'b0;
-            right <= 1'b0;
-
-            if (byte_ready) begin
-                if (code == BREAK) begin
-                    break_next <= 1;
-                end else begin
-                    if (break_next) begin
-                        // This is a key release, do nothing
-                        break_next <= 0;
-                    end else begin
-                        // This is a key press, generate a pulse
-                        case(code)
-                            UP:    up    <= 1;
-                            DOWN:  down  <= 1;
-                            LEFT:  left  <= 1;
-                            RIGHT: right <= 1;
-                        endcase
-                    end
-                end
+            // The ps2_receiver sets release_flag high for one cycle after a break code (0xF0) is received.
+            if (release_flag) begin // This is a key release event.
+                case(code)
+                    UP:    up    <= 1'b0;
+                    DOWN:  down  <= 1'b0;
+                    LEFT:  left  <= 1'b0;
+                    RIGHT: right <= 1'b0;
+                    SPACE: space <= 1'b0;
+                endcase
+            end else begin // This is a key press event.
+                case(code)
+                    UP:    up    <= 1'b1;
+                    DOWN:  down  <= 1'b1;
+                    LEFT:  left  <= 1'b1;
+                    RIGHT: right <= 1'b1;
+                    SPACE: space <= 1'b1;
+                endcase
             end
         end
     end
-
 endmodule

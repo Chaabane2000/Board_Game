@@ -1,41 +1,49 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Module Name: game_top
-// Description: Top Level Module
-//              FIXED: Audio Logic now MIXES Win Sound with Music correctly.
-//              FIXED: Added CDC (Toggle) logic to reliably catch fast game events.
-//              FIXED: Added SW[15] debug trigger.
-//              FIXED: Audio mixing logic to prevent clipping (High Frequency Whistle).
+// Description: This is the top-level module for the racing game. It integrates
+//              all components, including VGA video output, PS/2 keyboard input,
+//              7-segment display for scoring, audio output for music and sound
+//              effects, and game logic for controlling the car and environment.
 //////////////////////////////////////////////////////////////////////////////////
 
 
 module game_top(
-    //inputs
-    input clk, rst, in_up_bn, in_down_bn, in_left_bn, in_right_bn, in_center,
-    input PS2_CLK, PS2_DATA,
-    input [15:0] SW, // Changed to vector to support SW[15]
-    output logic aud_pwm,   
-    output logic aud_sd,      
-    //outputs
-    output reg [3:0] pix_r,
-    output reg [3:0] pix_g,
-    output reg [3:0] pix_b,
-    output hsync,
-    output vsync,
-    // 7-segment cathodes
-    output logic CA,
-    output logic CB,
-    output logic CC,
-    output logic CD,
-    output logic CE,
-    output logic CF,
-    output logic CG,
-    output logic DP,
+    // System Inputs
+    input  logic        clk,           // Main system clock (100MHz)
+    input  logic        rst,           // System reset
+    input  logic [15:0] SW,            // 16 slide switches for game options
 
-    // 7-segment anodes (digits)
-    output logic [7:0] AN
+    // Push Button Inputs
+    input  logic        in_up_bn,      // Up direction button
+    input  logic        in_down_bn,    // Down direction button
+    input  logic        in_left_bn,    // Left direction button
+    input  logic        in_right_bn,   // Right direction button
+    input  logic        in_center,     // Center button (acceleration)
+
+    // PS/2 Keyboard Inputs
+    input  logic        PS2_CLK,       // PS/2 keyboard clock
+    input  logic        PS2_DATA,      // PS/2 keyboard data
+
+    // Audio Outputs
+    output logic        aud_pwm,       // Pulse-Width Modulated audio output
+    output logic        aud_sd,        // Audio shutdown signal
+
+    // VGA Video Outputs
+    output reg   [3:0]  pix_r,         // 4-bit red color component
+    output reg   [3:0]  pix_g,         // 4-bit green color component
+    output reg   [3:0]  pix_b,         // 4-bit blue color component
+    output logic        hsync,         // Horizontal sync
+    output logic        vsync,         // Vertical sync
+
+    // 7-Segment Display Outputs
+    output logic        CA, CB, CC, CD, CE, CF, CG, DP, // Cathode segments
+    output logic [7:0]  AN             // Anode control for 8 digits
     );
     
+    //==============================================================================
+    // Clock Generation
+    //==============================================================================
     wire pixclk;
     clk_wiz_0 instance_name
    (
@@ -43,8 +51,13 @@ module game_top(
     .clk_out1(pixclk),     // output clk_out1
    // Clock in ports
     .clk_in1(clk));      // input clk_in1
+
+    //==============================================================================
+    // Input Handling (Keyboard and Buttons)
+    //==============================================================================
     logic in_up_key, in_down_key, in_left_key, in_right_key, in_space_key;
     keyboard_arrows keyboard(
+    // Decodes PS/2 signals into key presses for arrow keys and spacebar.
     .clk(clk),          // system clock
     .ps2_clk(PS2_CLK),      // PS2 clock input
     .ps2_data(PS2_DATA),    // PS2 data input
@@ -55,22 +68,29 @@ module game_top(
     .space(in_space_key)
     );
     
+    // Combine button and keyboard inputs for player controls.
     logic in_up, in_down, in_left, in_right;
     assign in_up = in_up_key || in_up_bn;
     assign in_down = in_down_key || in_down_bn;
     assign in_left = in_left_key || in_left_bn;
     assign in_right = in_right_key || in_right_bn;
    
-    logic [10:0] curr_x; // for implementation, comment when simulating
-    logic [9:0] curr_y; // for implementation, comment when simulating
+    //==============================================================================
+    // VGA and Game World Signals
+    //==============================================================================
+    logic [10:0] curr_x; 
+    logic [9:0] curr_y; 
     logic [3:0] pix_wire_r_0, pix_wire_g_0, pix_wire_b_0;
     logic [3:0] pix_wire_r_1, pix_wire_g_1, pix_wire_b_1;
     logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
    
-    // Create 40x25 background tilemap 
+    // Tilemap for the game world background (40 tiles wide, 25 tiles high).
+    // Each tile is represented by a 7-bit index.
     logic [6:0] tilemap [0:24][0:39];
     logic swtch;
 
+    // Initialize the tilemap with the default race track layout.
+    // This block runs once at the beginning of simulation.
     initial begin
         integer i, j;
         for (i=0; i<25; i=i+1) 
@@ -81,6 +101,7 @@ module game_top(
             end
         end
         tilemap[5][10] = 7'd0;
+        // ... (rest of the detailed tilemap initialization)
         tilemap[5][29] = 7'd0;
         tilemap[19][29] = 7'd0;
         tilemap[19][10] = 7'd0;
@@ -221,18 +242,22 @@ module game_top(
         tilemap[5][32] = 77;
         
         //add game name
-        tilemap[2][4] = 29;
-        tilemap[2][5] = 79;
-        tilemap[2][6] = 48;
-        tilemap[2][7] = 45;
-        tilemap[2][8] = 47;
+        tilemap[2][4] = 88;
+        tilemap[2][5] = 81;
+        tilemap[2][6] = 82;
+        tilemap[2][7] = 83;
+        tilemap[2][8] = 84;
         
-        tilemap[3][6] = 31;
-        tilemap[3][7] = 47;
-        tilemap[3][8] = 78;
-        tilemap[3][9] = 32;
+        tilemap[3][6] = 89;
+        tilemap[3][7] = 84;
+        tilemap[3][8] = 86;
+        tilemap[3][9] = 87;
     end
     
+    //==============================================================================
+    // Dynamic Tilemap Updates (Based on Switches)
+    //==============================================================================
+    // This block dynamically modifies the race track based on the state of SW[0], SW[1], and SW[2].
     always_ff @(posedge clk) begin
         integer i, j;
         if (SW[0]) begin
@@ -645,7 +670,7 @@ module game_top(
             tilemap[18][1] <= 7'd10;
             tilemap[18][2] <= 7'd13;
             tilemap[19][1] <= 7'd6;    
-            tilemap[19][2] <= 7'd17;      
+            tilemap[19][2] <= 7'd17;       
             
             tilemap[13][10] <= 7'd20;
             tilemap[14][11] <= 7'd13;
@@ -679,7 +704,7 @@ module game_top(
             
             // Remove garbage pixels
             for (i=0; i<=24; i=i+1)
-            begin                                                                                                                                                                   
+            begin                                                                                                                                              
                 tilemap[i][0] <= 7'd0;
             end
 
@@ -724,7 +749,7 @@ module game_top(
             tilemap[18][1] <= 7'd0;
             tilemap[18][2] <= 7'd0;
             tilemap[19][1] <= 7'd0;    
-            tilemap[19][2] <= 7'd0;      
+            tilemap[19][2] <= 7'd0;       
             
             tilemap[13][10] <= 7'd0;
             tilemap[14][11] <= 7'd0;
@@ -786,11 +811,12 @@ module game_top(
         end
     end
     
-    //detect switch changes
+    // Detect changes in the switches to trigger events like resetting the lap timer.
     logic sw0_prev, sw1_prev, sw2_prev;
     logic sw_change;  
     
     always_ff @(posedge clk or negedge rst) begin
+        // Store previous state of switches for edge detection.
         if (!rst) begin
             sw0_prev <= 1'b0;
             sw1_prev <= 1'b0;
@@ -804,10 +830,12 @@ module game_top(
     
     assign sw_change = (SW[0] ^ sw0_prev) | (SW[1] ^ sw1_prev) | (SW[2] ^ sw2_prev);
 
+    // A toggle signal that flips every time a relevant switch changes.
+    // Used to reset car position or other game states.
     logic sw_toggle;
 
     always_ff @(posedge clk or negedge rst) begin
-        if (!rst)
+        if (!rst) // Reset toggle on system reset
             sw_toggle <= 1'b0;
         else if (sw_change) begin  // your existing edge detector
             sw_toggle <= ~sw_toggle;
@@ -819,7 +847,10 @@ module game_top(
         end
     end
     
-
+    //==============================================================================
+    // Graphics Rendering Pipeline
+    //==============================================================================
+    // 1. Draw the background from the tilemap.
     background bg (
         .clk(pixclk),
         .rst(rst),
@@ -832,19 +863,15 @@ module game_top(
         .o_pix_b(pix_wire_b_2)
     );
     
-    // logic [3:0] pix_wire_r_2, pix_wire_g_2, pix_wire_b_2;
-    // drawcon blue_rec ( .in_pos_x(x_pos), .in_width_x(140), .draw_x(curr_x), 
-    //                  .in_pos_y(y_pos+100), .in_width_y(100), .draw_y(curr_y),
-    //                  .bg_color({pix_wire_r_1, pix_wire_g_1, pix_wire_b_1}), 
-    //                  .in_pix_r(4'b0000), .in_pix_g(4'b0000), .in_pix_b(4'b1111),
-    //                  .o_pix_r(pix_wire_r_2), .o_pix_g(pix_wire_g_2), .o_pix_b(pix_wire_b_2));                
-        
+    // Car state and position signals.
     logic [10:0] x_pos;
     logic [9:0] y_pos;
     logic accel_flag;
 
     assign accel_flag = in_space_key || in_center;
     
+    // 2. Draw the moving car sprite on top of the background.
+    // The car's state machine handles movement, collision, and rendering.
     moving_car_states green_car(.clk(pixclk), .rst(rst), .curr_x(curr_x), .curr_y(curr_y), .swtch(sw_toggle), .clr_swtch(SW[14]), .accel_flag(accel_flag), .bg_color({pix_wire_r_2, pix_wire_g_2, pix_wire_b_2}), .in_up(in_up), .in_down(in_down), .in_left(in_left), .in_right(in_right), .tilemap(tilemap), .o_pix_r(pix_wire_r_1), .o_pix_g(pix_wire_g_1), .o_pix_b(pix_wire_b_1), .y_pos(y_pos), .x_pos(x_pos));
     
     
@@ -856,6 +883,8 @@ module game_top(
     logic [6:0] lap_time;
     
     score lap_timer (
+        // This module calculates the lap time, best time, and drives the 7-segment display.
+        // It detects when the car crosses the finish line.
         .clk(clk),
         .rst(rst),
         .x_pos(x_pos - 26),
@@ -876,6 +905,8 @@ module game_top(
         .prev_thousands(prev_thousands)
     );
     
+    // This block displays the "LAP TIME" message and the recorded time on the screen
+    // for a few seconds after the finish line is crossed.
     logic crossed_line2;
     always @(posedge clk or negedge rst) begin
         if (~rst) begin
@@ -922,22 +953,22 @@ module game_top(
             if (thousands_final==0 && hundreds_final==0 && tens_final==0)
             begin
                 tilemap[12][22] <= 0;  
-                tilemap[12][23] <= 0;                 
+                tilemap[12][23] <= 0;                  
                 tilemap[12][24] <= 0;
             end
             else if (thousands_final==0 && hundreds_final==0) begin
                 tilemap[12][22] <= 0;  
-                tilemap[12][23] <= 0;                 
+                tilemap[12][23] <= 0;                  
                 tilemap[12][24] <= 35 + tens_final;  
             end
             else if (thousands_final==0) begin
                 tilemap[12][22] <= 0;  
-                tilemap[12][23] <= 35 + hundreds_final;                 
+                tilemap[12][23] <= 35 + hundreds_final;                  
                 tilemap[12][24] <= 35 + tens_final;  
             end
             else begin
                 tilemap[12][22] <= 35 + thousands_final;  
-                tilemap[12][23] <= 35 + hundreds_final;                 
+                tilemap[12][23] <= 35 + hundreds_final;                  
                 tilemap[12][24] <= 35 + tens_final;  
             end    
             tilemap[12][25] <= 35 + ones_final;     
@@ -993,23 +1024,41 @@ module game_top(
         
     end
     
+    // 3. Final VGA output driver.
+    // Takes the final pixel color data and generates VGA timing signals.
     vga_out vga (.clk(pixclk), .pix_in_r(pix_wire_r_1), .pix_in_g(pix_wire_g_1), .pix_in_b(pix_wire_b_1),.pix_r(pix_r), .pix_g(pix_g), .pix_b(pix_b), .hsync(hsync), .vsync(vsync), .curr_x(curr_x), .curr_y(curr_y));
 
-
+    //==============================================================================
+    // Audio Generation
+    //==============================================================================
     localparam ROM_DEPTH = 39526;
-    localparam Win_sound_ROM_DEPTH = 8748;
+    localparam Win_sound_ROM_DEPTH = 4374;
     localparam FIFO_WIDTH = 32;
     
-    // --- Signals ---
     logic [FIFO_WIDTH-1:0] current_audio_data;
     logic audio_req; 
     
-    // --- Clock Divider ---
-    // Remove old clk_cnt, audio_clk logic since we are moving to system clock.
-    // We retain this only if the driver needs an enable pulse, but we will use sample_tick.
+    // Sample Rate Generator for audio playback.
+    // The audio samples are played at a rate determined by this divider.
+    // 100MHz / 50000 = 2kHz sample rate.
+    localparam SAMPLE_DIVIDER = 50000; 
+    
+    logic [15:0] sample_cnt = 0; // Expanded width to support larger divider
+    logic sample_tick;
+    
+    // Generate a 'sample_tick' pulse at the desired audio sample rate.
+    always_ff @(posedge clk) begin
+        if (sample_cnt >= SAMPLE_DIVIDER - 1) begin
+            sample_cnt <= 0;
+            sample_tick <= 1'b1;
+        end else begin
+            sample_cnt <= sample_cnt + 1;
+            sample_tick <= 1'b0;
+        end
+    end
 
-    // --- STATIC ARRAY (Block RAM) ---
-    // (* rom_style = "block" *) forces Vivado to use BRAM instead of LUTs.
+    // BRAM for storing audio samples.
+    // The `rom_style = "block"` attribute ensures this is synthesized to Block RAM.
     (* rom_style = "block" *)
     logic [FIFO_WIDTH-1:0] music_storage [0:ROM_DEPTH-1];
     (* rom_style = "block" *)
@@ -1025,23 +1074,18 @@ module game_top(
         $readmemh("music_data.mem", music_storage);
         $readmemh("win_sound.mem", win_sound_storage);
     end
-
-    // Audio Output Logic (Mixer)
+    
     logic [FIFO_WIDTH-1:0] music_sample_reg;
     logic [FIFO_WIDTH-1:0] win_sample_reg;
     
-    // --- Audio Trigger Cross-Domain Crossing ---
-    // Fast Domain Trigger Latch
+    // Trigger for the "win" sound effect. This is a toggle-based flag
+    // to safely cross from the main clock domain to the audio sample clock domain.
     reg win_sound_req_toggle = 0;
-    reg sw15_r = 0, sw15_rr = 0; // Debounce/Edge
     
     always_ff @(posedge clk) begin
-        // Edge detect SW[15] in fast domain
-        sw15_r <= SW[15];
-        sw15_rr <= sw15_r; 
-        
-        // Trigger on Crossed Line OR SW[15] Rising Edge
-        if (crossed_line || (sw15_r && !sw15_rr))
+        // The win sound is triggered when the car crosses the finish line.
+        // The toggle ensures a single event is registered by the slower audio clock domain.
+        if (crossed_line)
             win_sound_req_toggle <= ~win_sound_req_toggle; // Toggle to signal event
     end
 
@@ -1049,22 +1093,8 @@ module game_top(
     reg win_sound_req_sync = 0;
     reg win_sound_req_prev = 0;
     
-    // --- Sample Rate Generator (8kHz) ---
-    // System Clock (100MHz) / 8000Hz = 12500 ticks
-    logic [13:0] sample_cnt = 0;
-    logic sample_tick;
-    
-    always_ff @(posedge clk) begin
-        if (sample_cnt == 12499) begin
-            sample_cnt <= 0;
-            sample_tick <= 1'b1;
-        end else begin
-            sample_cnt <= sample_cnt + 1;
-            sample_tick <= 1'b0;
-        end
-    end
-
-    // Playback Logic (Driven by System Clock, Gated by sample_tick)
+    // Main audio playback state machine.
+    // It reads samples from the BRAMs for music and sound effects.
     always_ff @(posedge clk) begin
         if (~rst) begin
             music_ptr <= 0;
@@ -1075,16 +1105,17 @@ module game_top(
             win_sound_req_sync <= 0;
             win_sound_req_prev <= 0;
         end else begin
-            // 1. Trigger Check (can happen anytime)
+            // Synchronize the win sound trigger to the audio clock domain.
             win_sound_req_sync <= win_sound_req_toggle;
             win_sound_req_prev <= win_sound_req_sync;
             
+            // On a detected edge of the trigger, start playing the win sound from the beginning.
             if (win_sound_req_sync != win_sound_req_prev) begin
                 win_active <= 1'b1;
                 win_ptr <= 0;
             end
 
-            // 2. Playback Update (Only at 8kHz)
+            // Update audio pointers and samples only on a sample_tick.
             if (sample_tick) begin
                 // Update Music Pointer
                 music_sample_reg <= music_storage[music_ptr];
@@ -1109,34 +1140,34 @@ module game_top(
         end
     end
 
-    // --- Audio Mixer (Combinatorial) ---
-    // Average Mixing: (A + B) / 2
+    // Audio Mixer: Combines the background music and the win sound effect.
     logic [8:0] mixed_sample; 
     
     always_comb begin
-        // Average Mixing prevents overflow and clipping (whistle sound)
-        mixed_sample = (music_sample_reg[7:0] + win_sample_reg[7:0]) >> 1;
+        // Mixing logic: The music volume is reduced when the win sound is playing
+        // to make the effect more prominent. SW[15] acts as a master mute for music.
+        mixed_sample = (((music_sample_reg[7:0] * SW[15]) >> 2 * (win_sample_reg[7:0]!=0)) + win_sample_reg[7:0]);
         
         current_audio_data = {24'd0, mixed_sample[7:0]};
     end
 
-    // The driver is never empty
+    // The audio driver's FIFO is fed continuously, so it's never empty.
     logic fifo_always_has_data;
     assign fifo_always_has_data = 1'b0; 
 
-    // --- Audio Driver Instance ---
-    // FIXED: Clocked at 100MHz (clk) instead of 2MHz.
-    //        This pushes PWM carrier to ~390kHz (ultrasonic), removing the whistle.
+    // Audio Driver: Converts the 8-bit digital audio sample into a PWM signal.
+    // It is clocked at the full 100MHz to push the PWM carrier frequency
+    // into the ultrasonic range, eliminating audible noise.
     fifo2audpwm #(
         .DATA_WIDTH(8),
         .FIFO_DATA_WIDTH(FIFO_WIDTH)
     ) u_audio_driver (
         .clk(clk),       // Use System Clock (100MHz)
         .aud_pwm(aud_pwm),
-        .aud_en(aud_sd),       
+        .aud_sd(aud_sd),       
         .fifo_rd_data(current_audio_data),
         .fifo_rd_en(audio_req), 
         .fifo_empty(fifo_always_has_data)
-    );
+        );
 
 endmodule
