@@ -117,7 +117,6 @@ Audio is generated using PWM output.
 
 Features:
 - Background music stored in on-chip memory
-- Sample-rate divider
 - Lap completion sound effect
 
 No external DAC is required.
@@ -140,7 +139,7 @@ Due to encrypted IP limitations in simulation, custom validation strategies were
 
 ## Tools & Technologies
 
-- Verilog HDL
+- SystemVerilog
 - Xilinx Vivado
 - Nexys A7-100T FPGA
 - Python 
