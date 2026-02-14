@@ -1,4 +1,4 @@
-# TURBO MODE  
+# TURBO MODE – An FPGA Racing Game
 ### A fully hardware-implemented racing game designed and executed on an FPGA platform.
 
 ![Game Screenshot](game.png)
