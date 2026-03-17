@@ -14,7 +14,9 @@ All graphics, movement, scoring, audio, and input handling are implemented direc
 
 The project runs on the **Nexys A7-100T FPGA** and outputs to a VGA display with keyboard and audio support.
 
-![Nexys A7-100T FPGA](Nexys.jpg){fig-align="center" width="400"}
+<p align="center">
+  <img src="Nexys.jpg" alt="Nexys A7-100T FPGA" width="400">
+</p>
 
 ------------------------------------------------------------------------
 
